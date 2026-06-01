@@ -6,6 +6,7 @@ import { MobileShell } from "@/components/MobileShell";
 import { FoodCard } from "@/components/FoodCard";
 import { menuQueryOptions } from "@/lib/queries";
 import biryaniHero from "@/assets/biryani-hero.jpg";
+import { useCart } from "@/lib/cart";
 
 export const Route = createFileRoute("/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(menuQueryOptions),
@@ -273,7 +274,7 @@ function SectionTitle({ title, icon }: { title: string; icon?: React.ReactNode }
 }
 
 function MiniCard({ item }: { item: import("@/lib/types").MenuItem }) {
-  const { add } = useImportCart();
+  const { add } = useCart();
   return (
     <motion.div whileTap={{ scale: 0.96 }} className="glass overflow-hidden rounded-2xl shadow-card">
       <div className="h-24 w-full bg-surface">
@@ -299,9 +300,4 @@ function MiniCard({ item }: { item: import("@/lib/types").MenuItem }) {
       </div>
     </motion.div>
   );
-}
-
-// Avoid circular import via re-export pattern
-function useImportCart() {
-  return require("@/lib/cart").useCart() as ReturnType<typeof import("@/lib/cart").useCart>;
 }
