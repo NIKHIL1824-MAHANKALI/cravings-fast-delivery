@@ -46,10 +46,10 @@ function Home() {
           className="relative"
         >
           <div className="flex items-center gap-1.5 text-xs text-primary">
-            <Sparkles className="h-3 w-3" /> NEW · ANDHRA KITCHEN
+            <Sparkles className="h-3 w-3" /> NEW · CRAVINGS KITCHEN
           </div>
           <h1 className="mt-2 text-[34px] font-bold leading-[1.05] tracking-tight">
-            Homemade <span className="neon-text">Andhra</span><br />flavours, delivered.
+            Homemade <span className="neon-text">flavours</span><br />delivered fast.
           </h1>
           <p className="mt-2 max-w-xs text-sm text-muted-foreground">
             Biryani, meals & snacks cooked fresh by home chefs. No frozen. No shortcuts.
@@ -175,7 +175,7 @@ function Home() {
       {/* Popular */}
       {bestsellers.length > 0 && (
         <section className="mt-8 px-5">
-          <SectionTitle title="Popular Andhra Dishes" icon={<Flame className="h-4 w-4" />} />
+          <SectionTitle title="Popular Dishes" icon={<Flame className="h-4 w-4" />} />
           <div className="mt-3 grid gap-3">
             {bestsellers.slice(0, 4).map((item) => (
               <FoodCard key={item.id} item={item} />
@@ -214,12 +214,12 @@ function Home() {
 
       {/* Why us */}
       <section className="mt-10 px-5">
-        <SectionTitle title="Why Andhra Meals" />
+        <SectionTitle title="Why CRAVINGS" />
         <div className="mt-3 grid grid-cols-2 gap-3">
           {[
             { icon: Truck, t: "Fast Delivery", s: "Under 30 min" },
             { icon: ShieldCheck, t: "Freshly Cooked", s: "No frozen food" },
-            { icon: Flame, t: "Authentic", s: "Real Andhra spice" },
+            { icon: Flame, t: "Authentic", s: "Real home spice" },
             { icon: Star, t: "Top Rated", s: "4.9★ avg rating" },
           ].map(({ icon: Icon, t, s }) => (
             <div key={t} className="glass rounded-2xl p-4">
@@ -254,9 +254,9 @@ function Home() {
       </section>
 
       <footer className="mt-12 px-5 pb-4 text-center">
-        <p className="text-2xl font-bold neon-text">Andhra Meals</p>
+        <p className="text-2xl font-bold neon-text">CRAVINGS</p>
         <p className="mt-1 text-xs text-muted-foreground">Homemade with love · Delivered fast</p>
-        <p className="mt-4 text-[10px] text-muted-foreground">© 2026 Andhra Meals. All rights reserved.</p>
+        <p className="mt-4 text-[10px] text-muted-foreground">© 2026 CRAVINGS. All rights reserved.</p>
       </footer>
     </MobileShell>
   );
