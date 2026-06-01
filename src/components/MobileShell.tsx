@@ -1,0 +1,66 @@
+import { Link, useRouterState } from "@tanstack/react-router";
+import { Home, UtensilsCrossed, ShoppingBag, User } from "lucide-react";
+import { useCart } from "@/lib/cart";
+import { motion } from "framer-motion";
+import type { ReactNode } from "react";
+
+const tabs = [
+  { to: "/", label: "Home", icon: Home },
+  { to: "/menu", label: "Menu", icon: UtensilsCrossed },
+  { to: "/cart", label: "Cart", icon: ShoppingBag },
+  { to: "/account", label: "You", icon: User },
+] as const;
+
+export function MobileShell({ children }: { children: ReactNode }) {
+  const { count } = useCart();
+  const path = useRouterState({ select: (s) => s.location.pathname });
+
+  return (
+    <div className="relative mx-auto min-h-screen w-full max-w-[480px] overflow-hidden bg-background">
+      {/* Ambient particles */}
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-0 mx-auto h-[60vh] w-full max-w-[480px] hero-radial" />
+      <div className="pointer-events-none fixed left-1/2 top-10 z-0 h-72 w-72 -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
+
+      <main className="relative z-10 pb-28">{children}</main>
+
+      <nav className="fixed bottom-0 left-1/2 z-50 mx-auto w-full max-w-[480px] -translate-x-1/2 px-4 pb-4 pt-2">
+        <div className="glass-strong flex items-center justify-around rounded-3xl px-2 py-2.5 shadow-card">
+          {tabs.map((t) => {
+            const active = path === t.to;
+            const Icon = t.icon;
+            const isCart = t.to === "/cart";
+            return (
+              <Link
+                key={t.to}
+                to={t.to}
+                className="relative flex flex-1 flex-col items-center gap-0.5 rounded-2xl px-2 py-1.5"
+              >
+                {active && (
+                  <motion.div
+                    layoutId="tab-pill"
+                    className="absolute inset-0 rounded-2xl bg-primary/15"
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+                <div className="relative">
+                  <Icon
+                    className={`h-5 w-5 transition-colors ${active ? "text-primary" : "text-muted-foreground"}`}
+                    strokeWidth={active ? 2.4 : 2}
+                  />
+                  {isCart && count > 0 && (
+                    <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground neon-glow">
+                      {count}
+                    </span>
+                  )}
+                </div>
+                <span className={`relative text-[10px] font-medium ${active ? "text-primary" : "text-muted-foreground"}`}>
+                  {t.label}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+    </div>
+  );
+}
