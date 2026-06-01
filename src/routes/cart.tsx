@@ -30,7 +30,7 @@ function CartPage() {
             <ShoppingBag className="h-10 w-10 text-muted-foreground" />
           </div>
           <p className="mt-6 text-lg font-bold">Cart is empty</p>
-          <p className="mt-1 text-sm text-muted-foreground">Add some delicious Andhra meals.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Add some delicious CRAVINGS meals.</p>
           <Link to="/menu" className="mt-6 rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground neon-glow">
             Browse Menu
           </Link>
