@@ -12,10 +12,11 @@ export function FoodCard({ item }: { item: MenuItem }) {
 
   return (
     <motion.div
-      whileHover={{ y: -4 }}
+      whileHover={{ y: -6, rotateX: 2, rotateY: -2 }}
       whileTap={{ scale: 0.98 }}
       transition={{ type: "spring", stiffness: 300, damping: 22 }}
-      className="glass group relative overflow-hidden rounded-3xl shadow-card"
+      style={{ transformStyle: "preserve-3d", perspective: 1000 }}
+      className="glass group relative overflow-hidden rounded-3xl shadow-card hover:shadow-[0_30px_60px_-20px_oklch(0.93_0.24_125/0.35)] transition-shadow"
     >
       {/* Image on top */}
       <div className="relative aspect-[5/3] w-full overflow-hidden bg-surface">
