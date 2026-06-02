@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Search, Flame, Sparkles, Clock, Truck, ShieldCheck, Star } from "lucide-react";
+import { Search, Flame, Sparkles, Clock, Truck, ShieldCheck, Star, Leaf, Heart } from "lucide-react";
 import { MobileShell } from "@/components/MobileShell";
 import { FoodCard } from "@/components/FoodCard";
 import { menuQueryOptions } from "@/lib/queries";
 import biryaniHero from "@/assets/biryani-hero.jpg";
+import cravingsLogo from "@/assets/cravings-wordmark.png";
 import { useCart } from "@/lib/cart";
 
 export const Route = createFileRoute("/")({
@@ -27,13 +28,11 @@ function Home() {
   return (
     <MobileShell>
       {/* Header */}
-      <header className="flex items-center justify-between px-5 pt-6">
-        <div>
-          <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Deliver to</p>
-          <p className="text-sm font-semibold">Home · 15 min</p>
-        </div>
-        <div className="glass flex h-10 w-10 items-center justify-center rounded-full">
-          <span className="text-base">🌶️</span>
+      <header className="flex items-center justify-between px-5 pt-5">
+        <img src={cravingsLogo} alt="cravings" className="h-8 w-auto" width={1280} height={512} />
+        <div className="glass flex items-center gap-2 rounded-full px-3 py-1.5">
+          <Clock className="h-3 w-3 text-primary" />
+          <span className="text-[11px] font-semibold">15 min</span>
         </div>
       </header>
 
@@ -45,25 +44,36 @@ function Home() {
           transition={{ duration: 0.6 }}
           className="relative"
         >
-          <div className="flex items-center gap-1.5 text-xs text-primary">
-            <Sparkles className="h-3 w-3" /> NEW · CRAVINGS KITCHEN
-          </div>
-          <h1 className="mt-2 text-[34px] font-bold leading-[1.05] tracking-tight">
-            Homemade <span className="neon-text">flavours</span><br />delivered fast.
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-primary"
+          >
+            <Sparkles className="h-3 w-3" /> Gourmet · Homemade · 15 Min
+          </motion.div>
+          <h1 className="font-display mt-3 text-[40px] font-bold leading-[1.02] tracking-tight">
+            Homemade <em className="italic neon-text">Andhra</em> Meals<br />
+            <span className="text-foreground/90">Delivered Fresh.</span>
           </h1>
-          <p className="mt-2 max-w-xs text-sm text-muted-foreground">
-            Biryani, meals & snacks cooked fresh by home chefs. No frozen. No shortcuts.
+          <p className="font-body mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">
+            Chicken Biryani, Bagara Rice, Curries, Snacks & Drinks — chef-crafted by home kitchens. No frozen. No shortcuts.
           </p>
 
           {/* 3D Floating Biryani */}
-          <div className="relative mx-auto mt-6 flex h-[280px] w-full items-center justify-center">
+          <div className="relative mx-auto mt-6 flex h-[300px] w-full items-center justify-center">
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="h-56 w-56 animate-pulse-glow rounded-full bg-primary/20 blur-2xl" />
+              <div className="h-60 w-60 animate-pulse-glow rounded-full bg-primary/25 blur-2xl" />
             </div>
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
               className="absolute h-72 w-72 rounded-full border border-dashed border-primary/30"
+            />
+            <motion.div
+              animate={{ rotate: -360 }}
+              transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+              className="absolute h-[340px] w-[340px] rounded-full border border-primary/10"
             />
             <motion.img
               src={biryaniHero}
@@ -71,45 +81,58 @@ function Home() {
               width={1024}
               height={1024}
               className="relative z-10 h-64 w-64 animate-float-slow rounded-full object-cover shadow-float"
-              style={{ filter: "drop-shadow(0 30px 40px rgba(200,255,0,0.25))" }}
+              style={{ filter: "drop-shadow(0 30px 40px rgba(198,255,0,0.35))" }}
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             />
             <motion.div
-              className="absolute -right-1 top-6 glass rounded-2xl px-3 py-2 shadow-card"
+              className="absolute -right-1 top-4 glass-strong rounded-2xl px-3 py-2 shadow-card"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.6 }}
             >
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Best Seller</p>
-              <p className="text-sm font-bold">Chicken Biryani</p>
-              <p className="text-xs neon-text">₹249</p>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Bestseller</p>
+              <p className="font-display text-sm font-bold">Chicken Biryani</p>
+              <p className="text-xs font-bold neon-text">₹249</p>
             </motion.div>
             <motion.div
-              className="absolute -left-1 bottom-6 glass flex items-center gap-2 rounded-2xl px-3 py-2 shadow-card"
+              className="absolute -left-1 bottom-4 glass-strong flex items-center gap-2 rounded-2xl px-3 py-2 shadow-card"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.8 }}
             >
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/20">
-                <Clock className="h-3.5 w-3.5 text-primary" />
+                <Leaf className="h-3.5 w-3.5 text-primary" />
               </div>
               <div>
-                <p className="text-[10px] text-muted-foreground">Fresh in</p>
-                <p className="text-xs font-bold">25 min</p>
+                <p className="text-[10px] text-muted-foreground">Made</p>
+                <p className="text-xs font-bold">Fresh today</p>
               </div>
             </motion.div>
           </div>
 
-          <Link
-            to="/menu"
-            className="mt-4 flex items-center justify-center gap-2 rounded-2xl bg-primary py-4 text-base font-bold text-primary-foreground neon-glow active:scale-95"
-          >
-            Order Now
-          </Link>
+          <div className="mt-5 grid grid-cols-2 gap-3">
+            <motion.div whileTap={{ scale: 0.96 }}>
+              <Link
+                to="/menu"
+                className="flex items-center justify-center gap-2 rounded-2xl bg-primary py-4 text-base font-bold text-primary-foreground neon-glow"
+              >
+                Order Now
+              </Link>
+            </motion.div>
+            <motion.div whileTap={{ scale: 0.96 }}>
+              <Link
+                to="/menu"
+                className="glass-strong flex items-center justify-center gap-2 rounded-2xl py-4 text-base font-bold text-foreground"
+              >
+                View Menu
+              </Link>
+            </motion.div>
+          </div>
         </motion.div>
       </section>
+
 
       {/* Search */}
       <section className="mt-8 px-5">
@@ -254,9 +277,11 @@ function Home() {
       </section>
 
       <footer className="mt-12 px-5 pb-4 text-center">
-        <p className="text-2xl font-bold neon-text">CRAVINGS</p>
-        <p className="mt-1 text-xs text-muted-foreground">Homemade with love · Delivered fast</p>
-        <p className="mt-4 text-[10px] text-muted-foreground">© 2026 CRAVINGS. All rights reserved.</p>
+        <img src={cravingsLogo} alt="cravings" className="mx-auto h-10 w-auto" width={1280} height={512} />
+        <p className="mt-2 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+          Homemade with <Heart className="h-3 w-3 fill-primary text-primary" /> · Delivered fast
+        </p>
+        <p className="mt-4 text-[10px] text-muted-foreground">© 2026 cravings™. Gourmet meals. Zero compromise.</p>
       </footer>
     </MobileShell>
   );
