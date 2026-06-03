@@ -53,7 +53,7 @@ function Home() {
             <Sparkles className="h-3 w-3" /> Gourmet · Homemade · 15 Min
           </motion.div>
           <h1 className="font-display mt-3 text-[40px] font-bold leading-[1.02] tracking-tight">
-            Homemade <em className="italic neon-text">Andhra</em> Meals<br />
+            Homemade <em className="italic neon-text">Desi</em> Meals<br />
             <span className="text-foreground/90">Delivered Fresh.</span>
           </h1>
           <p className="font-body mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">
