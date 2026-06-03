@@ -107,20 +107,27 @@ function Account() {
             ) : (
               <div className="space-y-2">
                 {orders.map((o) => (
-                  <div key={o.id} className="glass rounded-2xl p-4">
+                  <Link
+                    key={o.id}
+                    to="/track/$orderId"
+                    params={{ orderId: o.id }}
+                    className="glass block rounded-2xl p-4 transition-transform active:scale-[0.98]"
+                  >
                     <div className="flex items-center justify-between">
                       <p className="text-xs text-muted-foreground">
                         {new Date(o.created_at).toLocaleString()}
                       </p>
                       <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
-                        {o.status}
+                        {o.status.replace(/_/g, " ")}
                       </span>
                     </div>
                     <p className="mt-1 text-sm">
                       {Array.isArray(o.items) ? o.items.length : 0} items · <span className="font-bold neon-text">₹{Number(o.total)}</span>
                     </p>
-                  </div>
+                    <p className="mt-1 text-[10px] font-semibold text-primary">Track live →</p>
+                  </Link>
                 ))}
+
               </div>
             )}
           </div>
