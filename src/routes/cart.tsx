@@ -98,13 +98,14 @@ function CartPage() {
           {open && (
             <Checkout
               onClose={() => setOpen(false)}
-              onPlaced={() => {
+              onPlaced={(orderId) => {
                 clear();
                 setOpen(false);
-                navigate({ to: "/account" });
+                navigate({ to: "/track/$orderId", params: { orderId } });
               }}
             />
           )}
+
         </>
       )}
     </MobileShell>
