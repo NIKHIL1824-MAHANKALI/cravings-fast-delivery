@@ -1,0 +1,2 @@
+UPDATE menu_items SET description = 'Aromatic basmati rice layered with tender chicken, slow-cooked in authentic spices' WHERE name = 'Chicken Biryani';
+UPDATE menu_items SET description = 'Fiery chicken curry with rich gravy and bold spices' WHERE name = 'Chicken Curry';
