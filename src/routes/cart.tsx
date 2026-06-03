@@ -121,7 +121,7 @@ function Row({ label, value, bold }: { label: string; value: string; bold?: bool
   );
 }
 
-function Checkout({ onClose, onPlaced }: { onClose: () => void; onPlaced: () => void }) {
+function Checkout({ onClose, onPlaced }: { onClose: () => void; onPlaced: (orderId: string) => void }) {
   const { items, total } = useCart();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -138,7 +138,7 @@ function Checkout({ onClose, onPlaced }: { onClose: () => void; onPlaced: () => 
     }
     setLoading(true);
     const { data: userData } = await supabase.auth.getUser();
-    const { error } = await supabase.from("orders").insert({
+    const { data: inserted, error } = await supabase.from("orders").insert({
       user_id: userData.user?.id ?? null,
       customer_name: name,
       phone,
@@ -146,15 +146,16 @@ function Checkout({ onClose, onPlaced }: { onClose: () => void; onPlaced: () => 
       total: total + delivery,
       items: items as any,
       status: "pending",
-    });
+    }).select("id").single();
     setLoading(false);
-    if (error) {
-      toast.error(error.message);
+    if (error || !inserted) {
+      toast.error(error?.message ?? "Could not place order");
       return;
     }
     setSuccess(true);
-    setTimeout(onPlaced, 1800);
+    setTimeout(() => onPlaced(inserted.id), 1500);
   };
+
 
   return (
     <motion.div
