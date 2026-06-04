@@ -110,7 +110,7 @@ function CartPage() {
               onPlaced={(orderId) => {
                 clear();
                 setOpen(false);
-                navigate({ to: "/track/$orderId", params: { orderId } });
+                navigate({ to: "/order-confirmation/$orderId", params: { orderId } });
               }}
             />
           )}
