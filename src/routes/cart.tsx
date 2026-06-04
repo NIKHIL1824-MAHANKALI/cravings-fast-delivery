@@ -37,62 +37,71 @@ function CartPage() {
         </div>
       ) : (
         <>
-          <div className="space-y-3 px-5 pt-4">
-            <AnimatePresence>
-              {items.map((item) => (
-                <motion.div
-                  key={item.id}
-                  layout
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 100 }}
-                  className="glass flex items-center gap-3 rounded-2xl p-3"
-                >
-                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-surface">
-                    {item.image_url ? (
-                      <img src={item.image_url} alt={item.name} className="h-full w-full object-cover" loading="lazy" />
-                    ) : (
-                      <div className="flex h-full items-center justify-center text-2xl">🍛</div>
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="line-clamp-1 text-sm font-semibold">{item.name}</p>
-                    <p className="text-xs neon-text">₹{item.price}</p>
-                  </div>
-                  <div className="glass-strong flex items-center gap-2 rounded-full px-1">
-                    <button onClick={() => setQty(item.id, item.qty - 1)} className="flex h-7 w-7 items-center justify-center text-primary">
-                      <Minus className="h-3 w-3" strokeWidth={3} />
+          {/* Scrollable content with safe bottom padding so nothing hides under sticky CTA + bottom nav */}
+          <div className="pb-[200px]">
+            <div className="space-y-3 px-5 pt-4">
+              <AnimatePresence>
+                {items.map((item) => (
+                  <motion.div
+                    key={item.id}
+                    layout
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 100 }}
+                    className="glass flex items-center gap-3 rounded-2xl p-3"
+                  >
+                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-surface">
+                      {item.image_url ? (
+                        <img src={item.image_url} alt={item.name} className="h-full w-full object-cover" loading="lazy" />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-2xl">🍛</div>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="line-clamp-1 text-sm font-semibold">{item.name}</p>
+                      <p className="text-xs neon-text">₹{item.price}</p>
+                    </div>
+                    <div className="glass-strong flex items-center gap-2 rounded-full px-1">
+                      <button onClick={() => setQty(item.id, item.qty - 1)} className="flex h-7 w-7 items-center justify-center text-primary">
+                        <Minus className="h-3 w-3" strokeWidth={3} />
+                      </button>
+                      <span className="min-w-4 text-center text-sm font-bold">{item.qty}</span>
+                      <button onClick={() => setQty(item.id, item.qty + 1)} className="flex h-7 w-7 items-center justify-center text-primary">
+                        <Plus className="h-3 w-3" strokeWidth={3} />
+                      </button>
+                    </div>
+                    <button onClick={() => remove(item.id)} className="p-2 text-muted-foreground">
+                      <Trash2 className="h-3.5 w-3.5" />
                     </button>
-                    <span className="min-w-4 text-center text-sm font-bold">{item.qty}</span>
-                    <button onClick={() => setQty(item.id, item.qty + 1)} className="flex h-7 w-7 items-center justify-center text-primary">
-                      <Plus className="h-3 w-3" strokeWidth={3} />
-                    </button>
-                  </div>
-                  <button onClick={() => remove(item.id)} className="p-2 text-muted-foreground">
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
 
-          <div className="mt-6 px-5">
-            <div className="glass space-y-2 rounded-2xl p-4 text-sm">
-              <Row label="Subtotal" value={`₹${total}`} />
-              <Row label="Delivery" value={`₹${delivery}`} />
-              <div className="my-2 h-px bg-border" />
-              <Row label="Total" value={`₹${total + delivery}`} bold />
+            <div className="mt-6 px-5">
+              <div className="glass space-y-2 rounded-2xl p-4 text-sm">
+                <Row label="Subtotal" value={`₹${total}`} />
+                <Row label="Delivery" value={`₹${delivery}`} />
+                <div className="my-2 h-px bg-border" />
+                <Row label="Total" value={`₹${total + delivery}`} bold />
+              </div>
             </div>
           </div>
 
-          <div className="fixed bottom-24 left-1/2 z-40 w-full max-w-[480px] -translate-x-1/2 px-5">
-            <button
+          {/* Sticky Place Order CTA — sits above the bottom nav (nav ~88px tall incl. safe area) */}
+          <div
+            className="fixed left-1/2 z-40 w-full max-w-[480px] -translate-x-1/2 px-4"
+            style={{ bottom: "calc(96px + env(safe-area-inset-bottom, 0px))" }}
+          >
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              whileHover={{ y: -2 }}
               onClick={() => setOpen(true)}
-              className="flex w-full items-center justify-between rounded-2xl bg-primary px-5 py-4 text-base font-bold text-primary-foreground neon-glow active:scale-95"
+              className="flex h-[60px] w-full items-center justify-between rounded-2xl bg-primary px-6 text-base font-bold text-primary-foreground neon-glow shadow-[0_10px_40px_-10px_hsl(var(--primary)/0.6)] transition-shadow hover:shadow-[0_14px_50px_-8px_hsl(var(--primary)/0.8)]"
             >
-              <span>Checkout</span>
+              <span>Place Order</span>
               <span>₹{total + delivery} →</span>
-            </button>
+            </motion.button>
           </div>
 
           {open && (
