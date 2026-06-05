@@ -91,13 +91,13 @@ function CartPage() {
           {/* Sticky Place Order CTA — sits above the bottom nav (nav ~88px tall incl. safe area) */}
           <div
             className="fixed left-1/2 z-40 w-full max-w-[480px] -translate-x-1/2 px-4"
-            style={{ bottom: "calc(96px + env(safe-area-inset-bottom, 0px))" }}
+            style={{ bottom: "calc(112px + env(safe-area-inset-bottom, 0px))" }}
           >
             <motion.button
               whileTap={{ scale: 0.97 }}
               whileHover={{ y: -2 }}
               onClick={() => setOpen(true)}
-              className="flex h-[60px] w-full items-center justify-between rounded-2xl bg-primary px-6 text-base font-bold text-primary-foreground neon-glow shadow-[0_10px_40px_-10px_hsl(var(--primary)/0.6)] transition-shadow hover:shadow-[0_14px_50px_-8px_hsl(var(--primary)/0.8)]"
+              className="flex h-[68px] w-full items-center justify-between rounded-2xl bg-primary px-6 text-lg font-bold text-primary-foreground neon-glow shadow-[0_10px_40px_-10px_hsl(var(--primary)/0.6)] transition-shadow hover:shadow-[0_14px_50px_-8px_hsl(var(--primary)/0.8)]"
             >
               <span>Place Order</span>
               <span>₹{total + delivery} →</span>
