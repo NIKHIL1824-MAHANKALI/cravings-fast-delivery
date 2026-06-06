@@ -90,8 +90,17 @@ function TrackPage() {
   }, [orderId]);
 
   const cancelled = order?.status === "cancelled";
-  const currentIdx = order ? stepIndex(order.status) : 0;
-  const progressPct = cancelled ? 0 : ((currentIdx) / (STEPS.length - 1)) * 100;
+  // For cancelled orders: keep the steps the order had already passed (green),
+  // then append a red "Cancelled" step as the active one.
+  const lastReachedIdx = order ? (cancelled ? (prevStatus.current && prevStatus.current !== "cancelled" ? stepIndex(prevStatus.current) : -1) : stepIndex(order.status)) : 0;
+  const timelineSteps = cancelled
+    ? [
+        ...STEPS.slice(0, lastReachedIdx + 1),
+        { key: "cancelled" as Status, label: "Cancelled", sub: "Order was cancelled", Icon: XCircle, toast: "" },
+      ]
+    : STEPS;
+  const currentIdx = cancelled ? timelineSteps.length - 1 : stepIndex(order?.status ?? "pending");
+  const progressPct = cancelled ? 100 : (currentIdx / (STEPS.length - 1)) * 100;
 
   return (
     <MobileShell>
@@ -132,73 +141,66 @@ function TrackPage() {
                 <span className={`absolute inline-flex h-full w-full animate-ping rounded-full ${cancelled ? "bg-destructive" : "bg-primary"} opacity-75`} />
                 <span className={`relative inline-flex h-2 w-2 rounded-full ${cancelled ? "bg-destructive" : "bg-primary"}`} />
               </span>
-              <p className="text-xs font-semibold">
+              <p className={`text-xs font-semibold ${cancelled ? "text-destructive" : ""}`}>
                 {cancelled ? "Order cancelled" : STEPS[currentIdx].label}
               </p>
             </div>
 
-            {!cancelled && (
-              <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-surface">
-                <motion.div
-                  initial={false}
-                  animate={{ width: `${progressPct}%` }}
-                  transition={{ duration: 0.6, ease: "easeOut" }}
-                  className="h-full rounded-full bg-primary neon-glow"
-                />
-              </div>
-            )}
+            <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-surface">
+              <motion.div
+                initial={false}
+                animate={{ width: `${progressPct}%` }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+                className={`h-full rounded-full ${cancelled ? "bg-destructive" : "bg-primary neon-glow"}`}
+              />
+            </div>
           </div>
 
-          {cancelled ? (
-            <div className="glass flex items-start gap-3 rounded-2xl p-4">
-              <XCircle className="mt-0.5 h-5 w-5 text-destructive" />
-              <div>
-                <p className="text-sm font-bold">This order was cancelled</p>
-                <p className="mt-1 text-xs text-muted-foreground">Please contact support if this was unexpected.</p>
-              </div>
-            </div>
-          ) : (
-            <div className="glass rounded-2xl p-5">
-              <div className="relative">
-                {STEPS.map((step, i) => {
-                  const done = i < currentIdx;
-                  const active = i === currentIdx;
-                  const Icon = step.Icon;
-                  return (
-                    <div key={step.key} className="relative flex gap-4 pb-7 last:pb-0">
-                      {i < STEPS.length - 1 && (
-                        <div className="absolute left-[19px] top-10 h-[calc(100%-2.5rem)] w-px bg-border">
-                          <motion.div
-                            initial={{ height: 0 }}
-                            animate={{ height: done ? "100%" : "0%" }}
-                            transition={{ duration: 0.6, ease: "easeOut" }}
-                            className="w-px bg-primary"
-                          />
-                        </div>
-                      )}
-                      <motion.div
-                        animate={active ? { scale: [1, 1.08, 1] } : { scale: 1 }}
-                        transition={active ? { duration: 1.6, repeat: Infinity } : {}}
-                        className={`relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all ${
-                          done || active
-                            ? "bg-primary text-primary-foreground neon-glow"
-                            : "glass text-muted-foreground"
-                        }`}
-                      >
-                        {done ? <Check className="h-4 w-4" strokeWidth={3} /> : <Icon className="h-4 w-4" />}
-                      </motion.div>
-                      <div className="flex-1 pt-1.5">
-                        <p className={`text-sm font-bold ${done || active ? "text-foreground" : "text-muted-foreground"}`}>
-                          {step.label}
-                        </p>
-                        <p className="text-xs text-muted-foreground">{step.sub}</p>
+          <div className="glass rounded-2xl p-5">
+            <div className="relative">
+              {timelineSteps.map((step, i) => {
+                const isCancelStep = step.key === "cancelled";
+                const done = i < currentIdx;
+                const active = i === currentIdx;
+                const Icon = step.Icon;
+                const activeRed = active && isCancelStep;
+                return (
+                  <div key={step.key} className="relative flex gap-4 pb-7 last:pb-0">
+                    {i < timelineSteps.length - 1 && (
+                      <div className="absolute left-[19px] top-10 h-[calc(100%-2.5rem)] w-px bg-border">
+                        <motion.div
+                          initial={{ height: 0 }}
+                          animate={{ height: done ? "100%" : "0%" }}
+                          transition={{ duration: 0.6, ease: "easeOut" }}
+                          className="w-px bg-primary"
+                        />
                       </div>
+                    )}
+                    <motion.div
+                      animate={active && !activeRed ? { scale: [1, 1.08, 1] } : { scale: 1 }}
+                      transition={active && !activeRed ? { duration: 1.6, repeat: Infinity } : {}}
+                      className={`relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all ${
+                        activeRed
+                          ? "bg-destructive text-destructive-foreground shadow-[0_0_20px_hsl(var(--destructive)/0.6)]"
+                          : done || active
+                          ? "bg-primary text-primary-foreground neon-glow"
+                          : "glass text-muted-foreground"
+                      }`}
+                    >
+                      {done ? <Check className="h-4 w-4" strokeWidth={3} /> : <Icon className="h-4 w-4" />}
+                    </motion.div>
+                    <div className="flex-1 pt-1.5">
+                      <p className={`text-sm font-bold ${activeRed ? "text-destructive" : done || active ? "text-foreground" : "text-muted-foreground"}`}>
+                        {step.label}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{step.sub}</p>
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
+                );
+              })}
             </div>
-          )}
+          </div>
+
 
           <div className="glass rounded-2xl p-4">
             <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Delivering to</p>
