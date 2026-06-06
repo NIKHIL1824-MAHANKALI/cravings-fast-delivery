@@ -1,13 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { ArrowLeft, Check, ChefHat, Bike, PackageCheck, Receipt, XCircle } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowLeft, Check, ChefHat, Bike, PackageCheck, Receipt, XCircle, Package, ThumbsUp } from "lucide-react";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import { MobileShell } from "@/components/MobileShell";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/track/$orderId")({ component: TrackPage });
 
-type Status = "pending" | "preparing" | "out_for_delivery" | "delivered" | "cancelled";
+type Status =
+  | "pending" | "accepted" | "preparing" | "packed"
+  | "out_for_delivery" | "delivered" | "cancelled";
 
 interface Order {
   id: string;
@@ -20,11 +23,13 @@ interface Order {
   created_at: string;
 }
 
-const STEPS: { key: Status; label: string; sub: string; Icon: any }[] = [
-  { key: "pending", label: "Order Received", sub: "We've got your order", Icon: Receipt },
-  { key: "preparing", label: "Preparing", sub: "Chef is cooking fresh", Icon: ChefHat },
-  { key: "out_for_delivery", label: "Out for Delivery", sub: "On the way to you", Icon: Bike },
-  { key: "delivered", label: "Delivered", sub: "Enjoy your meal!", Icon: PackageCheck },
+const STEPS: { key: Status; label: string; sub: string; Icon: any; toast: string }[] = [
+  { key: "pending",          label: "Order Placed",     sub: "Waiting for confirmation",  Icon: Receipt,       toast: "Order placed" },
+  { key: "accepted",         label: "Accepted",         sub: "Restaurant accepted",       Icon: ThumbsUp,      toast: "Order accepted by restaurant" },
+  { key: "preparing",        label: "Preparing",        sub: "Chef is cooking fresh",     Icon: ChefHat,       toast: "Your food is being prepared" },
+  { key: "packed",           label: "Packed",           sub: "Ready for pickup",          Icon: Package,       toast: "Order packed and ready" },
+  { key: "out_for_delivery", label: "On The Way",       sub: "Delivery in progress",      Icon: Bike,          toast: "Your order is on the way" },
+  { key: "delivered",        label: "Delivered",        sub: "Enjoy your meal!",          Icon: PackageCheck,  toast: "Delivered. Enjoy!" },
 ];
 
 function stepIndex(s: Status) {
@@ -37,6 +42,7 @@ function TrackPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const prevStatus = useRef<Status | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -48,7 +54,10 @@ function TrackPage() {
         .maybeSingle();
       if (!mounted) return;
       if (error || !data) setNotFound(true);
-      else setOrder(data as Order);
+      else {
+        setOrder(data as Order);
+        prevStatus.current = (data as Order).status;
+      }
       setLoading(false);
     };
     load();
@@ -59,7 +68,17 @@ function TrackPage() {
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${orderId}` },
         (payload) => {
-          setOrder((prev) => ({ ...(prev as Order), ...(payload.new as Order) }));
+          const next = payload.new as Order;
+          if (prevStatus.current && prevStatus.current !== next.status) {
+            const step = STEPS.find((s) => s.key === next.status);
+            if (next.status === "cancelled") {
+              toast.error("Your order was cancelled");
+            } else if (step) {
+              toast.success(step.toast);
+            }
+          }
+          prevStatus.current = next.status;
+          setOrder((prev) => ({ ...(prev as Order), ...next }));
         }
       )
       .subscribe();
@@ -72,6 +91,7 @@ function TrackPage() {
 
   const cancelled = order?.status === "cancelled";
   const currentIdx = order ? stepIndex(order.status) : 0;
+  const progressPct = cancelled ? 0 : ((currentIdx) / (STEPS.length - 1)) * 100;
 
   return (
     <MobileShell>
@@ -116,6 +136,17 @@ function TrackPage() {
                 {cancelled ? "Order cancelled" : STEPS[currentIdx].label}
               </p>
             </div>
+
+            {!cancelled && (
+              <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-surface">
+                <motion.div
+                  initial={false}
+                  animate={{ width: `${progressPct}%` }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
+                  className="h-full rounded-full bg-primary neon-glow"
+                />
+              </div>
+            )}
           </div>
 
           {cancelled ? (
