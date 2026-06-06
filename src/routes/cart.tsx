@@ -90,8 +90,8 @@ function CartPage() {
 
           {/* Sticky Place Order CTA — sits above the bottom nav (nav ~88px tall incl. safe area) */}
           <div
-            className="fixed left-1/2 z-40 w-full max-w-[480px] -translate-x-1/2 px-4"
-            style={{ bottom: "calc(112px + env(safe-area-inset-bottom, 0px))" }}
+            className="fixed left-1/2 z-50 w-full max-w-[480px] -translate-x-1/2 px-4"
+            style={{ bottom: "calc(24px + env(safe-area-inset-bottom, 0px))" }}
           >
             <motion.button
               whileTap={{ scale: 0.97 }}
