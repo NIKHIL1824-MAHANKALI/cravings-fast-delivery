@@ -11,7 +11,7 @@ const tabs = [
   { to: "/account", label: "You", icon: User },
 ] as const;
 
-export function MobileShell({ children }: { children: ReactNode }) {
+export function MobileShell({ children, hideNav = false }: { children: ReactNode; hideNav?: boolean }) {
   const { count } = useCart();
   const path = useRouterState({ select: (s) => s.location.pathname });
 
