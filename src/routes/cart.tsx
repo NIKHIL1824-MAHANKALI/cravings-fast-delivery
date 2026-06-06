@@ -38,7 +38,7 @@ function CartPage() {
       ) : (
         <>
           {/* Scrollable content with safe bottom padding so nothing hides under sticky CTA + bottom nav */}
-          <div className="pb-[240px]">
+          <div className="pb-[160px]">
             <div className="space-y-3 px-5 pt-4">
               <AnimatePresence>
                 {items.map((item) => (
