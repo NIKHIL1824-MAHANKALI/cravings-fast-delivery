@@ -16,7 +16,7 @@ function CartPage() {
   const delivery = items.length > 0 ? 29 : 0;
 
   return (
-    <MobileShell>
+    <MobileShell hideNav>
       <header className="flex items-center gap-3 px-5 pt-6 pb-2">
         <Link to="/" className="glass flex h-10 w-10 items-center justify-center rounded-full">
           <ArrowLeft className="h-4 w-4" />
