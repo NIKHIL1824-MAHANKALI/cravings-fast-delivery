@@ -16,7 +16,7 @@ function CartPage() {
   const delivery = items.length > 0 ? 29 : 0;
 
   return (
-    <MobileShell>
+    <MobileShell hideNav>
       <header className="flex items-center gap-3 px-5 pt-6 pb-2">
         <Link to="/" className="glass flex h-10 w-10 items-center justify-center rounded-full">
           <ArrowLeft className="h-4 w-4" />
@@ -38,7 +38,7 @@ function CartPage() {
       ) : (
         <>
           {/* Scrollable content with safe bottom padding so nothing hides under sticky CTA + bottom nav */}
-          <div className="pb-[240px]">
+          <div className="pb-[160px]">
             <div className="space-y-3 px-5 pt-4">
               <AnimatePresence>
                 {items.map((item) => (
@@ -90,8 +90,8 @@ function CartPage() {
 
           {/* Sticky Place Order CTA — sits above the bottom nav (nav ~88px tall incl. safe area) */}
           <div
-            className="fixed left-1/2 z-40 w-full max-w-[480px] -translate-x-1/2 px-4"
-            style={{ bottom: "calc(112px + env(safe-area-inset-bottom, 0px))" }}
+            className="fixed left-1/2 z-50 w-full max-w-[480px] -translate-x-1/2 px-4"
+            style={{ bottom: "calc(24px + env(safe-area-inset-bottom, 0px))" }}
           >
             <motion.button
               whileTap={{ scale: 0.97 }}

@@ -11,7 +11,7 @@ const tabs = [
   { to: "/account", label: "You", icon: User },
 ] as const;
 
-export function MobileShell({ children }: { children: ReactNode }) {
+export function MobileShell({ children, hideNav = false }: { children: ReactNode; hideNav?: boolean }) {
   const { count } = useCart();
   const path = useRouterState({ select: (s) => s.location.pathname });
 
@@ -22,10 +22,11 @@ export function MobileShell({ children }: { children: ReactNode }) {
       <div className="pointer-events-none fixed left-1/2 top-10 z-0 h-72 w-72 -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
       <div className="pointer-events-none fixed -bottom-20 right-0 z-0 h-64 w-64 rounded-full bg-accent/10 blur-3xl" />
 
-      <main className="relative z-10" style={{ paddingBottom: "calc(96px + env(safe-area-inset-bottom, 0px))" }}>{children}</main>
+      <main className="relative z-10" style={{ paddingBottom: hideNav ? "0px" : "calc(96px + env(safe-area-inset-bottom, 0px))" }}>{children}</main>
 
+      {!hideNav && (
       <nav
-        className="fixed bottom-0 left-1/2 z-50 mx-auto w-full max-w-[480px] -translate-x-1/2 px-4 pt-2"
+        className="fixed bottom-0 left-1/2 z-30 mx-auto w-full max-w-[480px] -translate-x-1/2 px-4 pt-2"
         style={{ paddingBottom: "calc(16px + env(safe-area-inset-bottom, 0px))" }}
       >
         <div className="glass-strong flex items-center justify-around rounded-3xl px-2 py-2.5 shadow-card">
@@ -71,6 +72,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
           })}
         </div>
       </nav>
+      )}
     </div>
   );
 }
