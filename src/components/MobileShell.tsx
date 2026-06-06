@@ -72,6 +72,7 @@ export function MobileShell({ children, hideNav = false }: { children: ReactNode
           })}
         </div>
       </nav>
+      )}
     </div>
   );
 }
