@@ -1,8 +1,25 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Bell, X, Check, Eye, Trash2, CheckCheck, Package, Phone, MapPin, Clock } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Bell, X, Check, Eye, Trash2, CheckCheck, Package, Phone, MapPin, Clock, Volume2, VolumeX } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
+const MUTE_KEY = "cravings_admin_notifications_muted_v1";
+
+function loadMuted(): boolean {
+  if (typeof window === "undefined") return false;
+  try { return localStorage.getItem(MUTE_KEY) === "1"; } catch { return false; }
+}
+function saveMuted(v: boolean) {
+  try { localStorage.setItem(MUTE_KEY, v ? "1" : "0"); } catch {}
+}
+
+export function useNotificationMute() {
+  const [muted, setMutedState] = useState<boolean>(() => loadMuted());
+  const setMuted = useCallback((v: boolean) => { setMutedState(v); saveMuted(v); }, []);
+  const toggle = useCallback(() => setMutedState((prev) => { const n = !prev; saveMuted(n); return n; }), []);
+  return { muted, setMuted, toggle };
+}
 
 export interface OrderNotification {
   id: string;                // notif id
@@ -15,6 +32,7 @@ export interface OrderNotification {
   createdAt: string;         // order created_at
   receivedAt: string;        // when we captured it
   read: boolean;
+  status?: string;           // live-tracked order status
 }
 
 const LS_KEY = "cravings_admin_notifications_v1";
@@ -62,12 +80,15 @@ function playChime() {
 /* ---------- Hook: subscribe to new orders ---------- */
 export function useOrderNotifications(opts: {
   enabled: boolean;
+  muted?: boolean;
   onNewOrder?: (n: OrderNotification) => void;
 }) {
-  const { enabled, onNewOrder } = opts;
+  const { enabled, muted, onNewOrder } = opts;
   const [notifs, setNotifs] = useState<OrderNotification[]>(() => loadStore());
   const notifsRef = useRef(notifs);
   notifsRef.current = notifs;
+  const mutedRef = useRef(!!muted);
+  mutedRef.current = !!muted;
 
   const persist = (updater: (prev: OrderNotification[]) => OrderNotification[]) => {
     setNotifs((prev) => {
@@ -85,7 +106,6 @@ export function useOrderNotifications(opts: {
         { event: "INSERT", schema: "public", table: "orders" },
         (payload) => {
           const o = payload.new as any;
-          // De-dupe (in case listener + parent both hear the event)
           if (notifsRef.current.some((n) => n.orderId === o.id)) return;
           const n: OrderNotification = {
             id: `${o.id}-${Date.now()}`,
@@ -98,10 +118,17 @@ export function useOrderNotifications(opts: {
             createdAt: o.created_at,
             receivedAt: new Date().toISOString(),
             read: false,
+            status: o.status,
           };
           persist((prev) => [n, ...prev]);
-          playChime();
+          if (!mutedRef.current) playChime();
           onNewOrder?.(n);
+        })
+      .on("postgres_changes",
+        { event: "UPDATE", schema: "public", table: "orders" },
+        (payload) => {
+          const o = payload.new as any;
+          persist((prev) => prev.map((n) => n.orderId === o.id ? { ...n, status: o.status } : n));
         })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
@@ -123,6 +150,7 @@ export function useOrderNotifications(opts: {
 /* ---------- Bell + dropdown ---------- */
 export function NotificationBell({
   notifs, unread, markRead, markAllRead, remove, clearAll, onView, onAccept, onReject, canAct,
+  muted, onToggleMute,
 }: {
   notifs: OrderNotification[];
   unread: number;
@@ -134,6 +162,8 @@ export function NotificationBell({
   onAccept: (orderId: string) => Promise<void> | void;
   onReject: (orderId: string) => Promise<void> | void;
   canAct: boolean;
+  muted: boolean;
+  onToggleMute: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -184,6 +214,14 @@ export function NotificationBell({
                 </p>
               </div>
               <div className="flex items-center gap-1">
+                <button
+                  onClick={onToggleMute}
+                  className={`rounded-full px-2 py-1 text-[10px] font-bold ${muted ? "text-destructive" : "text-primary"} hover:opacity-80`}
+                  title={muted ? "Unmute sound" : "Mute sound"}
+                  aria-label={muted ? "Unmute notifications" : "Mute notifications"}
+                >
+                  {muted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
+                </button>
                 {notifs.length > 0 && (
                   <>
                     <button
@@ -261,6 +299,11 @@ function NotifRow({
           <div className="flex items-center gap-2">
             <p className="text-sm font-bold">🔔 New Order</p>
             <span className="text-[10px] font-mono text-muted-foreground">#{n.orderId.slice(0, 6)}</span>
+            {n.status && (
+              <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">
+                {n.status.replace(/_/g, " ")}
+              </span>
+            )}
           </div>
           <p className="mt-0.5 text-xs text-muted-foreground">A new customer order has been placed.</p>
 

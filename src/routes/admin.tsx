@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import type { MenuItem, Category } from "@/lib/types";
-import { NotificationBell, useOrderNotifications, showNewOrderToast } from "@/components/admin/NotificationCenter";
+import { NotificationBell, useOrderNotifications, useNotificationMute, showNewOrderToast } from "@/components/admin/NotificationCenter";
 
 export const Route = createFileRoute("/admin")({ component: AdminPage });
 
@@ -101,9 +101,13 @@ function AdminPage() {
     refresh();
   };
 
+  // Persisted mute preference
+  const { muted, toggle: toggleMute } = useNotificationMute();
+
   // Realtime new-order notifications (bell + toast + sound + auto-refresh)
   const { notifs, unread, markRead, markAllRead, remove, clearAll } = useOrderNotifications({
     enabled: !checking,
+    muted,
     onNewOrder: (n) => {
       refresh();
       showNewOrderToast(n, {
@@ -196,6 +200,8 @@ function AdminPage() {
               onView={() => { setTab("orders"); setOrderFilter("pending"); }}
               onAccept={(id) => setOrderStatus(id, "accepted")}
               onReject={(id) => setOrderStatus(id, "cancelled")}
+              muted={muted}
+              onToggleMute={toggleMute}
             />
             <Link to="/" className="hidden glass rounded-full px-3 py-1.5 text-xs font-semibold md:block">View store</Link>
             <button onClick={signOut} className="glass flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold">
