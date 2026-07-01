@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ShieldCheck, LogOut, Plus, Pencil, Trash2, Check, X, Search,
   LayoutDashboard, ClipboardList, UtensilsCrossed, Users, Bell,
@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import type { MenuItem, Category } from "@/lib/types";
+import { NotificationBell, useOrderNotifications, showNewOrderToast } from "@/components/admin/NotificationCenter";
 
 export const Route = createFileRoute("/admin")({ component: AdminPage });
 
@@ -78,16 +79,11 @@ function AdminPage() {
     })();
   }, [navigate]);
 
-  // Realtime new-order notifications
+  // Realtime status updates (INSERT is handled by useOrderNotifications below)
   useEffect(() => {
     if (checking) return;
     const channel = supabase
-      .channel("admin-orders")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "orders" }, (payload) => {
-        const o = payload.new as Order;
-        toast.success(`🔔 New order from ${o.customer_name} · ₹${o.total}`);
-        refresh();
-      })
+      .channel("admin-order-updates")
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders" }, (payload) => {
         const o = payload.new as Order;
         if (o.status === "cancelled") toast(`Order #${o.id.slice(0, 6)} cancelled`, { icon: "⚠️" });
@@ -96,6 +92,27 @@ function AdminPage() {
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [checking]);
+
+  // Order actions used by notification quick-actions
+  const setOrderStatus = async (id: string, status: OrderStatus) => {
+    const { error } = await supabase.from("orders").update({ status }).eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success(`Order ${status}`);
+    refresh();
+  };
+
+  // Realtime new-order notifications (bell + toast + sound + auto-refresh)
+  const { notifs, unread, markRead, markAllRead, remove, clearAll } = useOrderNotifications({
+    enabled: !checking,
+    onNewOrder: (n) => {
+      refresh();
+      showNewOrderToast(n, {
+        onView: () => { setTab("orders"); setOrderFilter("pending"); },
+        onAccept: isAdmin ? () => setOrderStatus(n.orderId, "accepted") : undefined,
+        onReject: isAdmin ? () => setOrderStatus(n.orderId, "cancelled") : undefined,
+      });
+    },
+  });
 
   const refresh = async (initial = false) => {
     const [{ data: m }, { data: o }] = await Promise.all([
@@ -168,6 +185,18 @@ function AdminPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <NotificationBell
+              notifs={notifs}
+              unread={unread}
+              markRead={markRead}
+              markAllRead={markAllRead}
+              remove={remove}
+              clearAll={clearAll}
+              canAct={isAdmin}
+              onView={() => { setTab("orders"); setOrderFilter("pending"); }}
+              onAccept={(id) => setOrderStatus(id, "accepted")}
+              onReject={(id) => setOrderStatus(id, "cancelled")}
+            />
             <Link to="/" className="hidden glass rounded-full px-3 py-1.5 text-xs font-semibold md:block">View store</Link>
             <button onClick={signOut} className="glass flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold">
               <LogOut className="h-3.5 w-3.5" /> Sign out
