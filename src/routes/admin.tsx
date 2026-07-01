@@ -79,16 +79,11 @@ function AdminPage() {
     })();
   }, [navigate]);
 
-  // Realtime new-order notifications
+  // Realtime status updates (INSERT is handled by useOrderNotifications below)
   useEffect(() => {
     if (checking) return;
     const channel = supabase
-      .channel("admin-orders")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "orders" }, (payload) => {
-        const o = payload.new as Order;
-        toast.success(`🔔 New order from ${o.customer_name} · ₹${o.total}`);
-        refresh();
-      })
+      .channel("admin-order-updates")
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders" }, (payload) => {
         const o = payload.new as Order;
         if (o.status === "cancelled") toast(`Order #${o.id.slice(0, 6)} cancelled`, { icon: "⚠️" });
@@ -97,6 +92,27 @@ function AdminPage() {
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [checking]);
+
+  // Order actions used by notification quick-actions
+  const setOrderStatus = async (id: string, status: OrderStatus) => {
+    const { error } = await supabase.from("orders").update({ status }).eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success(`Order ${status}`);
+    refresh();
+  };
+
+  // Realtime new-order notifications (bell + toast + sound + auto-refresh)
+  const { notifs, unread, markRead, markAllRead, remove, clearAll } = useOrderNotifications({
+    enabled: !checking,
+    onNewOrder: (n) => {
+      refresh();
+      showNewOrderToast(n, {
+        onView: () => { setTab("orders"); setOrderFilter("pending"); },
+        onAccept: isAdmin ? () => setOrderStatus(n.orderId, "accepted") : undefined,
+        onReject: isAdmin ? () => setOrderStatus(n.orderId, "cancelled") : undefined,
+      });
+    },
+  });
 
   const refresh = async (initial = false) => {
     const [{ data: m }, { data: o }] = await Promise.all([
