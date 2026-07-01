@@ -32,6 +32,7 @@ export interface OrderNotification {
   createdAt: string;         // order created_at
   receivedAt: string;        // when we captured it
   read: boolean;
+  status?: string;           // live-tracked order status
 }
 
 const LS_KEY = "cravings_admin_notifications_v1";
