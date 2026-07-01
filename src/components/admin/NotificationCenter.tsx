@@ -1,8 +1,25 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Bell, X, Check, Eye, Trash2, CheckCheck, Package, Phone, MapPin, Clock } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Bell, X, Check, Eye, Trash2, CheckCheck, Package, Phone, MapPin, Clock, Volume2, VolumeX } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
+const MUTE_KEY = "cravings_admin_notifications_muted_v1";
+
+function loadMuted(): boolean {
+  if (typeof window === "undefined") return false;
+  try { return localStorage.getItem(MUTE_KEY) === "1"; } catch { return false; }
+}
+function saveMuted(v: boolean) {
+  try { localStorage.setItem(MUTE_KEY, v ? "1" : "0"); } catch {}
+}
+
+export function useNotificationMute() {
+  const [muted, setMutedState] = useState<boolean>(() => loadMuted());
+  const setMuted = useCallback((v: boolean) => { setMutedState(v); saveMuted(v); }, []);
+  const toggle = useCallback(() => setMutedState((prev) => { const n = !prev; saveMuted(n); return n; }), []);
+  return { muted, setMuted, toggle };
+}
 
 export interface OrderNotification {
   id: string;                // notif id
