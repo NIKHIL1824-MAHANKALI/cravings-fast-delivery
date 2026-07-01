@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import type { MenuItem, Category } from "@/lib/types";
-import { NotificationBell, useOrderNotifications, showNewOrderToast } from "@/components/admin/NotificationCenter";
+import { NotificationBell, useOrderNotifications, useNotificationMute, showNewOrderToast } from "@/components/admin/NotificationCenter";
 
 export const Route = createFileRoute("/admin")({ component: AdminPage });
 
