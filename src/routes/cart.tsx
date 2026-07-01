@@ -147,8 +147,14 @@ function Checkout({ onClose, onPlaced }: { onClose: () => void; onPlaced: (order
     }
     setLoading(true);
     const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) {
+      setLoading(false);
+      toast.error("Please sign in to place an order");
+      window.location.href = "/auth";
+      return;
+    }
     const { data: inserted, error } = await supabase.from("orders").insert({
-      user_id: userData.user?.id ?? null,
+      user_id: userData.user.id,
       customer_name: name,
       phone,
       address,
