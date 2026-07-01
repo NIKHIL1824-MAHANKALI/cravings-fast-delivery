@@ -185,6 +185,18 @@ function AdminPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <NotificationBell
+              notifs={notifs}
+              unread={unread}
+              markRead={markRead}
+              markAllRead={markAllRead}
+              remove={remove}
+              clearAll={clearAll}
+              canAct={isAdmin}
+              onView={() => { setTab("orders"); setOrderFilter("pending"); }}
+              onAccept={(id) => setOrderStatus(id, "accepted")}
+              onReject={(id) => setOrderStatus(id, "cancelled")}
+            />
             <Link to="/" className="hidden glass rounded-full px-3 py-1.5 text-xs font-semibold md:block">View store</Link>
             <button onClick={signOut} className="glass flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold">
               <LogOut className="h-3.5 w-3.5" /> Sign out
