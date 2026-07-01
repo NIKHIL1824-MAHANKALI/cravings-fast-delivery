@@ -142,6 +142,7 @@ export function useOrderNotifications(opts: {
 /* ---------- Bell + dropdown ---------- */
 export function NotificationBell({
   notifs, unread, markRead, markAllRead, remove, clearAll, onView, onAccept, onReject, canAct,
+  muted, onToggleMute,
 }: {
   notifs: OrderNotification[];
   unread: number;
@@ -153,6 +154,8 @@ export function NotificationBell({
   onAccept: (orderId: string) => Promise<void> | void;
   onReject: (orderId: string) => Promise<void> | void;
   canAct: boolean;
+  muted: boolean;
+  onToggleMute: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
