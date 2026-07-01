@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ShieldCheck, LogOut, Plus, Pencil, Trash2, Check, X, Search,
   LayoutDashboard, ClipboardList, UtensilsCrossed, Users, Bell,
@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import type { MenuItem, Category } from "@/lib/types";
+import { NotificationBell, useOrderNotifications, showNewOrderToast } from "@/components/admin/NotificationCenter";
 
 export const Route = createFileRoute("/admin")({ component: AdminPage });
 
