@@ -206,10 +206,21 @@ export function NotificationBell({
                 </p>
               </div>
               <div className="flex items-center gap-1">
+                <button
+                  onClick={onToggleMute}
+                  className={`rounded-full px-2 py-1 text-[10px] font-bold ${muted ? "text-destructive" : "text-primary"} hover:opacity-80`}
+                  title={muted ? "Unmute sound" : "Mute sound"}
+                  aria-label={muted ? "Unmute notifications" : "Mute notifications"}
+                >
+                  {muted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
+                </button>
                 {notifs.length > 0 && (
                   <>
                     <button
                       onClick={markAllRead}
+                      className="rounded-full px-2 py-1 text-[10px] font-bold text-muted-foreground hover:text-foreground"
+                      title="Mark all read"
+                    >
                       className="rounded-full px-2 py-1 text-[10px] font-bold text-muted-foreground hover:text-foreground"
                       title="Mark all read"
                     >
