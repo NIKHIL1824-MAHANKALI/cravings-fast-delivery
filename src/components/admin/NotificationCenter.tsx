@@ -221,9 +221,6 @@ export function NotificationBell({
                       className="rounded-full px-2 py-1 text-[10px] font-bold text-muted-foreground hover:text-foreground"
                       title="Mark all read"
                     >
-                      className="rounded-full px-2 py-1 text-[10px] font-bold text-muted-foreground hover:text-foreground"
-                      title="Mark all read"
-                    >
                       <CheckCheck className="h-3.5 w-3.5" />
                     </button>
                     <button
