@@ -101,9 +101,13 @@ function AdminPage() {
     refresh();
   };
 
+  // Persisted mute preference
+  const { muted, toggle: toggleMute } = useNotificationMute();
+
   // Realtime new-order notifications (bell + toast + sound + auto-refresh)
   const { notifs, unread, markRead, markAllRead, remove, clearAll } = useOrderNotifications({
     enabled: !checking,
+    muted,
     onNewOrder: (n) => {
       refresh();
       showNewOrderToast(n, {
