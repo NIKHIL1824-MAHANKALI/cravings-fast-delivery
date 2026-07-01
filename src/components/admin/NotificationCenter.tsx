@@ -299,6 +299,11 @@ function NotifRow({
           <div className="flex items-center gap-2">
             <p className="text-sm font-bold">🔔 New Order</p>
             <span className="text-[10px] font-mono text-muted-foreground">#{n.orderId.slice(0, 6)}</span>
+            {n.status && (
+              <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">
+                {n.status.replace(/_/g, " ")}
+              </span>
+            )}
           </div>
           <p className="mt-0.5 text-xs text-muted-foreground">A new customer order has been placed.</p>
 
