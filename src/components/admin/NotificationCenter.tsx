@@ -118,10 +118,17 @@ export function useOrderNotifications(opts: {
             createdAt: o.created_at,
             receivedAt: new Date().toISOString(),
             read: false,
+            status: o.status,
           };
           persist((prev) => [n, ...prev]);
           if (!mutedRef.current) playChime();
           onNewOrder?.(n);
+        })
+      .on("postgres_changes",
+        { event: "UPDATE", schema: "public", table: "orders" },
+        (payload) => {
+          const o = payload.new as any;
+          persist((prev) => prev.map((n) => n.orderId === o.id ? { ...n, status: o.status } : n));
         })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
