@@ -200,6 +200,8 @@ function AdminPage() {
               onView={() => { setTab("orders"); setOrderFilter("pending"); }}
               onAccept={(id) => setOrderStatus(id, "accepted")}
               onReject={(id) => setOrderStatus(id, "cancelled")}
+              muted={muted}
+              onToggleMute={toggleMute}
             />
             <Link to="/" className="hidden glass rounded-full px-3 py-1.5 text-xs font-semibold md:block">View store</Link>
             <button onClick={signOut} className="glass flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold">
