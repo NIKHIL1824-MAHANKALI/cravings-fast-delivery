@@ -66,7 +66,7 @@ export type Database = {
           phone: string
           status: Database["public"]["Enums"]["order_status"]
           total: number
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           address: string
@@ -77,7 +77,7 @@ export type Database = {
           phone: string
           status?: Database["public"]["Enums"]["order_status"]
           total: number
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           address?: string
@@ -88,7 +88,7 @@ export type Database = {
           phone?: string
           status?: Database["public"]["Enums"]["order_status"]
           total?: number
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -118,13 +118,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
       app_role: "admin" | "customer" | "staff"
