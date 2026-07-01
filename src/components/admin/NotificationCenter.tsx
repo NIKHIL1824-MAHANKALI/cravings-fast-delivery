@@ -79,12 +79,15 @@ function playChime() {
 /* ---------- Hook: subscribe to new orders ---------- */
 export function useOrderNotifications(opts: {
   enabled: boolean;
+  muted?: boolean;
   onNewOrder?: (n: OrderNotification) => void;
 }) {
-  const { enabled, onNewOrder } = opts;
+  const { enabled, muted, onNewOrder } = opts;
   const [notifs, setNotifs] = useState<OrderNotification[]>(() => loadStore());
   const notifsRef = useRef(notifs);
   notifsRef.current = notifs;
+  const mutedRef = useRef(!!muted);
+  mutedRef.current = !!muted;
 
   const persist = (updater: (prev: OrderNotification[]) => OrderNotification[]) => {
     setNotifs((prev) => {
@@ -102,7 +105,6 @@ export function useOrderNotifications(opts: {
         { event: "INSERT", schema: "public", table: "orders" },
         (payload) => {
           const o = payload.new as any;
-          // De-dupe (in case listener + parent both hear the event)
           if (notifsRef.current.some((n) => n.orderId === o.id)) return;
           const n: OrderNotification = {
             id: `${o.id}-${Date.now()}`,
@@ -117,7 +119,7 @@ export function useOrderNotifications(opts: {
             read: false,
           };
           persist((prev) => [n, ...prev]);
-          playChime();
+          if (!mutedRef.current) playChime();
           onNewOrder?.(n);
         })
       .subscribe();
