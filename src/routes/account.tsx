@@ -130,10 +130,64 @@ function Account() {
         </div>
       ) : (
         <div className="space-y-5 px-5 pt-4">
-          <div className="glass rounded-2xl p-4">
-            <p className="text-xs text-muted-foreground">Signed in as</p>
-            <p className="text-sm font-semibold">{user.email}</p>
+          <div className="glass-strong rounded-3xl p-5">
+            <div className="flex items-center gap-4">
+              <label className="relative h-16 w-16 shrink-0 cursor-pointer overflow-hidden rounded-full bg-primary/15">
+                {profile?.avatar_url ? (
+                  <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-primary">
+                    <UserIcon className="h-7 w-7" />
+                  </div>
+                )}
+                <div className="absolute inset-x-0 bottom-0 flex items-center justify-center bg-black/60 py-0.5 text-[9px] font-bold text-white">
+                  {uploadingAvatar ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Camera className="mr-0.5 h-2.5 w-2.5" />Edit</>}
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => e.target.files?.[0] && uploadAvatar(e.target.files[0])}
+                />
+              </label>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-bold">{profile?.full_name || user.email}</p>
+                <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+                <p className="mt-0.5 text-[10px] text-muted-foreground">
+                  Member since {new Date(profile?.created_at || user.created_at).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              <label className="block">
+                <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Full name</span>
+                <input
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="glass w-full rounded-xl px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary"
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Phone</span>
+                <input
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  type="tel"
+                  className="glass w-full rounded-xl px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary"
+                />
+              </label>
+              <button
+                onClick={saveProfile}
+                disabled={savingProfile}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3 text-xs font-bold text-primary-foreground neon-glow disabled:opacity-50"
+              >
+                {savingProfile && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                Save profile
+              </button>
+            </div>
           </div>
+
 
           {isAdmin && (
             <Link to="/admin" className="glass-strong flex items-center gap-3 rounded-2xl p-4">
