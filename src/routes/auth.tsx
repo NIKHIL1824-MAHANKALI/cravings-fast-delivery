@@ -80,7 +80,7 @@ function AuthPage() {
               { k: "password", i: <KeyRound className="h-3.5 w-3.5" />, l: "Password" },
               { k: "email-otp", i: <Mail className="h-3.5 w-3.5" />, l: "Email OTP" },
               { k: "phone-otp", i: <Phone className="h-3.5 w-3.5" />, l: "Phone OTP" },
-            ] as { k: Tab; i: JSX.Element; l: string }[]
+            ] as { k: Tab; i: React.ReactNode; l: string }[]
           ).map((t) => (
             <button
               key={t.k}
@@ -391,7 +391,7 @@ function Field({
   value: string;
   onChange: (v: string) => void;
   type?: string;
-} & React.InputHTMLAttributes<HTMLInputElement>) {
+} & Omit<React.InputHTMLAttributes<HTMLInputElement>, "value" | "onChange" | "type">) {
   return (
     <label className="block">
       <span className="mb-1 block text-xs font-semibold text-muted-foreground">{label}</span>
