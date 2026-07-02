@@ -144,8 +144,8 @@ function Account() {
           <div className="glass-strong rounded-3xl p-5">
             <div className="flex items-center gap-4">
               <label className="relative h-16 w-16 shrink-0 cursor-pointer overflow-hidden rounded-full bg-primary/15">
-                {profile?.avatar_url ? (
-                  <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center text-primary">
                     <UserIcon className="h-7 w-7" />
