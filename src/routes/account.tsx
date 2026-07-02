@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, LogOut, Package, Shield, User as UserIcon } from "lucide-react";
+import { ArrowLeft, LogOut, Package, Shield, User as UserIcon, Camera, Loader2 } from "lucide-react";
 import { MobileShell } from "@/components/MobileShell";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
@@ -16,12 +16,39 @@ interface Order {
   items: any;
 }
 
+interface Profile {
+  id: string;
+  full_name: string | null;
+  phone: string | null;
+  avatar_url: string | null;
+  created_at: string;
+}
+
 function Account() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+
+  const loadUser = async (u: User) => {
+    const [{ data: roles }, { data: prof }, { data: ord }] = await Promise.all([
+      supabase.from("user_roles").select("role").eq("user_id", u.id),
+      supabase.from("profiles").select("*").eq("id", u.id).maybeSingle(),
+      supabase.from("orders").select("id,total,status,created_at,items").order("created_at", { ascending: false }).limit(10),
+    ]);
+    setIsAdmin(!!roles?.find((r) => r.role === "admin"));
+    const p = (prof as Profile | null) ?? null;
+    setProfile(p);
+    setFullName(p?.full_name ?? (u.user_metadata?.full_name as string) ?? "");
+    setPhone(p?.phone ?? (u.user_metadata?.phone as string) ?? "");
+    setOrders((ord || []) as Order[]);
+  };
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
@@ -29,24 +56,47 @@ function Account() {
     });
     supabase.auth.getUser().then(async ({ data }) => {
       setUser(data.user);
-      if (data.user) {
-        const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", data.user.id);
-        setIsAdmin(!!roles?.find((r) => r.role === "admin"));
-        const { data: ord } = await supabase
-          .from("orders")
-          .select("id,total,status,created_at,items")
-          .order("created_at", { ascending: false })
-          .limit(10);
-        setOrders((ord || []) as Order[]);
-      }
+      if (data.user) await loadUser(data.user);
       setLoading(false);
     });
     return () => sub.subscription.unsubscribe();
   }, []);
 
+  const saveProfile = async () => {
+    if (!user) return;
+    setSavingProfile(true);
+    const { error } = await supabase
+      .from("profiles")
+      .upsert({ id: user.id, email: user.email, full_name: fullName.trim(), phone: phone.trim(), updated_at: new Date().toISOString() });
+    setSavingProfile(false);
+    if (error) return toast.error(error.message);
+    toast.success("Profile saved");
+    await loadUser(user);
+  };
+
+  const uploadAvatar = async (file: File) => {
+    if (!user) return;
+    setUploadingAvatar(true);
+    try {
+      const path = `${user.id}/${Date.now()}-${file.name}`;
+      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+      if (upErr) throw upErr;
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      const { error } = await supabase.from("profiles").upsert({ id: user.id, avatar_url: data.publicUrl, updated_at: new Date().toISOString() });
+      if (error) throw error;
+      toast.success("Photo updated");
+      await loadUser(user);
+    } catch (e: any) {
+      toast.error(e.message || "Upload failed");
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
+    setProfile(null);
     setOrders([]);
     toast.success("Signed out");
   };
