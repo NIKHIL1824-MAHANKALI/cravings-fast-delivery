@@ -36,6 +36,15 @@ function Account() {
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
 
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  const resolveAvatar = async (path: string | null) => {
+    if (!path) return null;
+    if (path.startsWith("http")) return path;
+    const { data } = await supabase.storage.from("avatars").createSignedUrl(path, 3600);
+    return data?.signedUrl ?? null;
+  };
+
   const loadUser = async (u: User) => {
     const [{ data: roles }, { data: prof }, { data: ord }] = await Promise.all([
       supabase.from("user_roles").select("role").eq("user_id", u.id),
@@ -47,6 +56,7 @@ function Account() {
     setProfile(p);
     setFullName(p?.full_name ?? (u.user_metadata?.full_name as string) ?? "");
     setPhone(p?.phone ?? (u.user_metadata?.phone as string) ?? "");
+    setAvatarUrl(await resolveAvatar(p?.avatar_url ?? null));
     setOrders((ord || []) as Order[]);
   };
 
@@ -76,13 +86,14 @@ function Account() {
 
   const uploadAvatar = async (file: File) => {
     if (!user) return;
+    if (file.size > 3 * 1024 * 1024) return toast.error("Image must be under 3MB");
     setUploadingAvatar(true);
     try {
-      const path = `${user.id}/${Date.now()}-${file.name}`;
-      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `${user.id}/avatar-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type });
       if (upErr) throw upErr;
-      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-      const { error } = await supabase.from("profiles").upsert({ id: user.id, avatar_url: data.publicUrl, updated_at: new Date().toISOString() });
+      const { error } = await supabase.from("profiles").upsert({ id: user.id, avatar_url: path, updated_at: new Date().toISOString() });
       if (error) throw error;
       toast.success("Photo updated");
       await loadUser(user);
