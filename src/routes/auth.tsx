@@ -1,49 +1,96 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Loader2, Mail, Phone, KeyRound } from "lucide-react";
+import { ArrowLeft, Loader2, Mail, ArrowRight } from "lucide-react";
 import { MobileShell } from "@/components/MobileShell";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
-import { PasswordStrength, isPasswordStrong } from "@/components/auth/PasswordStrength";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 export const Route = createFileRoute("/auth")({ component: AuthPage });
 
-type Tab = "password" | "email-otp" | "phone-otp";
-type PwMode = "in" | "up" | "forgot";
-
-// Simple client-side rate limit for password login
-const ATTEMPTS_KEY = "cravings_login_attempts";
-const MAX_ATTEMPTS = 5;
-const LOCK_MS = 5 * 60 * 1000;
-
-function getLock(): number {
-  try {
-    const raw = localStorage.getItem(ATTEMPTS_KEY);
-    if (!raw) return 0;
-    const { count, ts } = JSON.parse(raw);
-    if (count >= MAX_ATTEMPTS && Date.now() - ts < LOCK_MS) return LOCK_MS - (Date.now() - ts);
-  } catch {}
-  return 0;
-}
-function bumpAttempts(reset = false) {
-  if (reset) return localStorage.removeItem(ATTEMPTS_KEY);
-  const raw = localStorage.getItem(ATTEMPTS_KEY);
-  const cur = raw ? JSON.parse(raw) : { count: 0, ts: Date.now() };
-  cur.count += 1;
-  cur.ts = Date.now();
-  localStorage.setItem(ATTEMPTS_KEY, JSON.stringify(cur));
-}
-
 function AuthPage() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState<Tab>("password");
+  const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [step, setStep] = useState<"email" | "otp">("email");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [cd, setCd] = useState(0);
+  const cooldownRef = useRef<number>(0);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) navigate({ to: "/account" });
     });
   }, [navigate]);
+
+  useEffect(() => {
+    if (!cd) return;
+    const id = setInterval(() => setCd((c) => Math.max(0, c - 1)), 1000);
+    return () => clearInterval(id);
+  }, [cd]);
+
+  const validEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+
+  const sendCode = async (isResend = false) => {
+    setError(null);
+    if (!validEmail(email)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+    if (Date.now() < cooldownRef.current) return;
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email: email.trim(),
+        options: {
+          shouldCreateUser: true,
+          // No emailRedirectTo → Supabase sends OTP code instead of a magic link
+        },
+      });
+      if (error) {
+        setError(error.message);
+        toast.error(error.message);
+        return;
+      }
+      cooldownRef.current = Date.now() + 60_000;
+      setCd(60);
+      setStep("otp");
+      setOtp("");
+      toast.success(isResend ? "New 6-digit code sent." : "6-digit code sent to your email.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verify = async (code: string) => {
+    setError(null);
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email: email.trim(),
+        token: code,
+        type: "email",
+      });
+      if (error) {
+        setError(error.message || "Invalid or expired code");
+        toast.error(error.message || "Invalid or expired code");
+        setOtp("");
+        return;
+      }
+      toast.success("Signed in!");
+      navigate({ to: "/" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onOtpChange = (v: string) => {
+    setOtp(v);
+    setError(null);
+    if (v.length === 6 && !loading) verify(v);
+  };
 
   return (
     <MobileShell hideNav>
@@ -74,335 +121,117 @@ function AuthPage() {
           <div className="h-px flex-1 bg-border" />
         </div>
 
-        <div className="glass mt-2 grid grid-cols-3 gap-1 rounded-2xl p-1">
-          {(
-            [
-              { k: "password", i: <KeyRound className="h-3.5 w-3.5" />, l: "Password" },
-              { k: "email-otp", i: <Mail className="h-3.5 w-3.5" />, l: "Email OTP" },
-              { k: "phone-otp", i: <Phone className="h-3.5 w-3.5" />, l: "Phone OTP" },
-            ] as { k: Tab; i: React.ReactNode; l: string }[]
-          ).map((t) => (
+        {step === "email" ? (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              sendCode(false);
+            }}
+            className="space-y-3 glass-strong rounded-3xl p-5"
+          >
+            <div className="mb-1 flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+              <Mail className="h-3.5 w-3.5" /> Sign in with email code
+            </div>
+            <label className="block">
+              <span className="mb-1 block text-xs font-semibold text-muted-foreground">Email</span>
+              <input
+                type="email"
+                required
+                autoComplete="email"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setError(null);
+                }}
+                placeholder="you@example.com"
+                className="glass w-full rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary"
+              />
+            </label>
+            {error && <p className="text-xs text-destructive">{error}</p>}
             <button
-              key={t.k}
-              onClick={() => setTab(t.k)}
-              className={`flex items-center justify-center gap-1.5 rounded-xl py-2 text-[11px] font-bold transition ${
-                tab === t.k ? "bg-primary text-primary-foreground" : "text-muted-foreground"
-              }`}
+              type="submit"
+              disabled={loading || !email}
+              className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-bold text-primary-foreground neon-glow disabled:opacity-50"
             >
-              {t.i} {t.l}
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
+              {loading ? "Sending code..." : "Send 6-digit code"}
             </button>
-          ))}
-        </div>
+            <p className="pt-1 text-center text-[10px] text-muted-foreground">
+              We'll email you a 6-digit verification code. No password needed.
+            </p>
+          </form>
+        ) : (
+          <div className="space-y-4 glass-strong rounded-3xl p-5">
+            <div>
+              <div className="mb-1 flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                <Mail className="h-3.5 w-3.5" /> Enter verification code
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Sent to <span className="font-semibold text-foreground">{email}</span>
+              </p>
+            </div>
 
-        <div className="mt-4">
-          {tab === "password" && <PasswordForm />}
-          {tab === "email-otp" && <EmailOtpForm />}
-          {tab === "phone-otp" && <PhoneOtpForm />}
-        </div>
+            <div className="flex justify-center py-2">
+              <InputOTP
+                maxLength={6}
+                value={otp}
+                onChange={onOtpChange}
+                disabled={loading}
+                autoFocus
+              >
+                <InputOTPGroup className="gap-2">
+                  {[0, 1, 2, 3, 4, 5].map((i) => (
+                    <InputOTPSlot
+                      key={i}
+                      index={i}
+                      className="h-12 w-11 rounded-xl border border-border bg-background/40 text-lg font-bold"
+                    />
+                  ))}
+                </InputOTPGroup>
+              </InputOTP>
+            </div>
+
+            {loading && (
+              <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" /> Verifying...
+              </div>
+            )}
+            {error && <p className="text-center text-xs text-destructive">{error}</p>}
+
+            <button
+              type="button"
+              onClick={() => verify(otp)}
+              disabled={loading || otp.length < 6}
+              className="w-full rounded-2xl bg-primary py-3.5 text-sm font-bold text-primary-foreground neon-glow disabled:opacity-50"
+            >
+              {loading ? "Verifying..." : "Verify & sign in"}
+            </button>
+
+            <div className="flex items-center justify-between text-[11px]">
+              <button
+                type="button"
+                onClick={() => {
+                  setStep("email");
+                  setOtp("");
+                  setError(null);
+                }}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                ← Change email
+              </button>
+              <button
+                type="button"
+                onClick={() => sendCode(true)}
+                disabled={cd > 0 || loading}
+                className="text-primary disabled:text-muted-foreground disabled:opacity-60"
+              >
+                {cd > 0 ? `Resend in ${cd}s` : "Resend code"}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </MobileShell>
-  );
-}
-
-/* ---------------------- Password (sign in / sign up / forgot) ---------------------- */
-function PasswordForm() {
-  const navigate = useNavigate();
-  const [mode, setMode] = useState<PwMode>("in");
-  const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const lockedFor = getLock();
-    if (mode === "in" && lockedFor > 0) {
-      return toast.error(`Too many attempts. Try again in ${Math.ceil(lockedFor / 60000)} min.`);
-    }
-
-    setLoading(true);
-    try {
-      if (mode === "up") {
-        if (!fullName.trim()) return toast.error("Enter your full name");
-        if (!isPasswordStrong(password)) return toast.error("Password does not meet requirements");
-        if (password !== confirm) return toast.error("Passwords do not match");
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: window.location.origin + "/account",
-            data: { full_name: fullName.trim(), phone: phone.trim() },
-          },
-        });
-        if (error) return toast.error(error.message);
-        toast.success("Check your email to verify your account.");
-        setMode("in");
-      } else if (mode === "in") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-          bumpAttempts();
-          if (error.message.toLowerCase().includes("email not confirmed")) {
-            return toast.error("Please verify your email. Check your inbox.");
-          }
-          return toast.error(error.message);
-        }
-        bumpAttempts(true);
-        toast.success("Welcome back!");
-        navigate({ to: "/" });
-      } else {
-        // forgot
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: window.location.origin + "/reset-password",
-        });
-        if (error) return toast.error(error.message);
-        toast.success("Password reset link sent. Check your email.");
-        setMode("in");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const resendVerify = async () => {
-    if (!email) return toast.error("Enter your email first");
-    const { error } = await supabase.auth.resend({ type: "signup", email });
-    if (error) return toast.error(error.message);
-    toast.success("Verification email sent.");
-  };
-
-  return (
-    <form onSubmit={submit} className="space-y-3 glass-strong rounded-3xl p-5">
-      {mode === "up" && (
-        <>
-          <Field label="Full name" value={fullName} onChange={setFullName} required />
-          <Field label="Phone number" value={phone} onChange={setPhone} type="tel" placeholder="+91 98765 43210" />
-        </>
-      )}
-      <Field label="Email" value={email} onChange={setEmail} type="email" required />
-      {mode !== "forgot" && (
-        <>
-          <Field label="Password" value={password} onChange={setPassword} type="password" required minLength={8} />
-          {mode === "up" && <PasswordStrength password={password} />}
-          {mode === "up" && (
-            <Field label="Confirm password" value={confirm} onChange={setConfirm} type="password" required minLength={8} />
-          )}
-        </>
-      )}
-
-      <button
-        type="submit"
-        disabled={loading}
-        className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-bold text-primary-foreground neon-glow disabled:opacity-50"
-      >
-        {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-        {mode === "in" ? "Sign in" : mode === "up" ? "Create account" : "Send reset link"}
-      </button>
-
-      <div className="flex flex-col items-center gap-1 pt-1 text-[11px]">
-        {mode === "in" && (
-          <>
-            <button type="button" onClick={() => setMode("forgot")} className="text-primary">
-              Forgot password?
-            </button>
-            <button type="button" onClick={() => setMode("up")} className="text-muted-foreground">
-              Don't have an account? <span className="text-foreground">Sign up</span>
-            </button>
-            <button type="button" onClick={resendVerify} className="text-muted-foreground">
-              Didn't get verification email? <span className="text-foreground">Resend</span>
-            </button>
-          </>
-        )}
-        {mode === "up" && (
-          <button type="button" onClick={() => setMode("in")} className="text-muted-foreground">
-            Already have an account? <span className="text-foreground">Sign in</span>
-          </button>
-        )}
-        {mode === "forgot" && (
-          <button type="button" onClick={() => setMode("in")} className="text-muted-foreground">
-            Back to <span className="text-foreground">Sign in</span>
-          </button>
-        )}
-      </div>
-    </form>
-  );
-}
-
-/* ---------------------- Email OTP ---------------------- */
-function EmailOtpForm() {
-  const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
-  const [sent, setSent] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const cooldownRef = useRef<number>(0);
-  const [cd, setCd] = useState(0);
-
-  useEffect(() => {
-    if (!cd) return;
-    const id = setInterval(() => setCd((c) => Math.max(0, c - 1)), 1000);
-    return () => clearInterval(id);
-  }, [cd]);
-
-  const send = async () => {
-    if (Date.now() < cooldownRef.current) return;
-    setLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { shouldCreateUser: true, emailRedirectTo: window.location.origin + "/account" },
-    });
-    setLoading(false);
-    if (error) return toast.error(error.message);
-    cooldownRef.current = Date.now() + 60_000;
-    setCd(60);
-    setSent(true);
-    toast.success("6-digit code sent to your email.");
-  };
-
-  const verify = async () => {
-    setLoading(true);
-    const { error } = await supabase.auth.verifyOtp({ email, token: otp, type: "email" });
-    setLoading(false);
-    if (error) return toast.error(error.message);
-    toast.success("Signed in!");
-    navigate({ to: "/" });
-  };
-
-  return (
-    <div className="space-y-3 glass-strong rounded-3xl p-5">
-      <Field label="Email" value={email} onChange={setEmail} type="email" required />
-      {sent && <Field label="6-digit code" value={otp} onChange={setOtp} inputMode="numeric" maxLength={6} />}
-      {!sent ? (
-        <button
-          onClick={send}
-          disabled={loading || !email}
-          className="w-full rounded-2xl bg-primary py-3.5 text-sm font-bold text-primary-foreground neon-glow disabled:opacity-50"
-        >
-          {loading ? "Sending..." : "Send code"}
-        </button>
-      ) : (
-        <>
-          <button
-            onClick={verify}
-            disabled={loading || otp.length < 6}
-            className="w-full rounded-2xl bg-primary py-3.5 text-sm font-bold text-primary-foreground neon-glow disabled:opacity-50"
-          >
-            {loading ? "Verifying..." : "Verify & sign in"}
-          </button>
-          <button
-            onClick={send}
-            disabled={cd > 0 || loading}
-            className="w-full text-center text-[11px] text-muted-foreground disabled:opacity-50"
-          >
-            {cd > 0 ? `Resend in ${cd}s` : "Resend code"}
-          </button>
-        </>
-      )}
-    </div>
-  );
-}
-
-/* ---------------------- Phone OTP ---------------------- */
-function PhoneOtpForm() {
-  const navigate = useNavigate();
-  const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
-  const [sent, setSent] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [cd, setCd] = useState(0);
-
-  useEffect(() => {
-    if (!cd) return;
-    const id = setInterval(() => setCd((c) => Math.max(0, c - 1)), 1000);
-    return () => clearInterval(id);
-  }, [cd]);
-
-  const send = async () => {
-    setLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({ phone });
-    setLoading(false);
-    if (error) {
-      if (error.message.toLowerCase().includes("sms") || error.message.toLowerCase().includes("provider")) {
-        return toast.error("SMS provider not configured. Ask the admin to enable phone auth.");
-      }
-      return toast.error(error.message);
-    }
-    setSent(true);
-    setCd(60);
-    toast.success("Code sent via SMS.");
-  };
-
-  const verify = async () => {
-    setLoading(true);
-    const { error } = await supabase.auth.verifyOtp({ phone, token: otp, type: "sms" });
-    setLoading(false);
-    if (error) return toast.error(error.message);
-    toast.success("Signed in!");
-    navigate({ to: "/" });
-  };
-
-  return (
-    <div className="space-y-3 glass-strong rounded-3xl p-5">
-      <Field label="Phone (with country code)" value={phone} onChange={setPhone} type="tel" placeholder="+919876543210" required />
-      {sent && <Field label="6-digit code" value={otp} onChange={setOtp} inputMode="numeric" maxLength={6} />}
-      {!sent ? (
-        <button
-          onClick={send}
-          disabled={loading || !phone}
-          className="w-full rounded-2xl bg-primary py-3.5 text-sm font-bold text-primary-foreground neon-glow disabled:opacity-50"
-        >
-          {loading ? "Sending..." : "Send SMS code"}
-        </button>
-      ) : (
-        <>
-          <button
-            onClick={verify}
-            disabled={loading || otp.length < 6}
-            className="w-full rounded-2xl bg-primary py-3.5 text-sm font-bold text-primary-foreground neon-glow disabled:opacity-50"
-          >
-            {loading ? "Verifying..." : "Verify & sign in"}
-          </button>
-          <button
-            onClick={send}
-            disabled={cd > 0 || loading}
-            className="w-full text-center text-[11px] text-muted-foreground disabled:opacity-50"
-          >
-            {cd > 0 ? `Resend in ${cd}s` : "Resend code"}
-          </button>
-        </>
-      )}
-      <p className="text-center text-[10px] text-muted-foreground">
-        Requires SMS provider in backend auth settings.
-      </p>
-    </div>
-  );
-}
-
-/* ---------------------- Bits ---------------------- */
-function Field({
-  label,
-  value,
-  onChange,
-  type = "text",
-  ...rest
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  type?: string;
-} & Omit<React.InputHTMLAttributes<HTMLInputElement>, "value" | "onChange" | "type">) {
-  return (
-    <label className="block">
-      <span className="mb-1 block text-xs font-semibold text-muted-foreground">{label}</span>
-      <input
-        {...rest}
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="glass w-full rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary"
-      />
-    </label>
   );
 }
 
