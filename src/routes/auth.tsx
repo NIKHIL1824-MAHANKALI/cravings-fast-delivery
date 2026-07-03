@@ -170,8 +170,8 @@ function AuthPage() {
             {error && <p className="text-xs text-destructive">{error}</p>}
             <button
               type="submit"
-              disabled={loading || !email}
-              className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-bold text-primary-foreground neon-glow disabled:opacity-50"
+              disabled={loading || !emailIsValid}
+              className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-bold text-primary-foreground neon-glow disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
               {loading ? "Sending code..." : "Send 6-digit code"}
