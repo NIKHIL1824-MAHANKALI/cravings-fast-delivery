@@ -32,24 +32,40 @@ function AuthPage() {
   }, [cd]);
 
   const validEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+  const emailIsValid = validEmail(email);
 
   const sendCode = async (isResend = false) => {
     setError(null);
-    if (!validEmail(email)) {
+    const trimmed = email.trim();
+    console.log("[auth] sendCode invoked", { email: trimmed, isResend });
+
+    if (!validEmail(trimmed)) {
+      console.warn("[auth] invalid email, aborting", trimmed);
       setError("Please enter a valid email address");
       return;
     }
-    if (Date.now() < cooldownRef.current) return;
+    if (!supabase || !supabase.auth || typeof supabase.auth.signInWithOtp !== "function") {
+      console.error("[auth] Supabase client not initialized correctly", supabase);
+      setError("Authentication service unavailable. Please refresh and try again.");
+      toast.error("Authentication service unavailable.");
+      return;
+    }
+    if (Date.now() < cooldownRef.current) {
+      console.log("[auth] cooldown active, skipping send");
+      return;
+    }
+
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email: email.trim(),
-        options: {
-          shouldCreateUser: true,
-          // No emailRedirectTo → Supabase sends OTP code instead of a magic link
-        },
+      console.log("[auth] calling supabase.auth.signInWithOtp...");
+      const { data, error } = await supabase.auth.signInWithOtp({
+        email: trimmed,
+        options: { shouldCreateUser: true },
       });
+      console.log("[auth] signInWithOtp response", { data, error });
+
       if (error) {
+        console.error("[auth] Supabase OTP error:", error);
         setError(error.message);
         toast.error(error.message);
         return;
@@ -58,7 +74,11 @@ function AuthPage() {
       setCd(60);
       setStep("otp");
       setOtp("");
-      toast.success(isResend ? "New 6-digit code sent." : "6-digit code sent to your email.");
+      toast.success("Verification code sent to your email.");
+    } catch (err: any) {
+      console.error("[auth] Unexpected error sending OTP:", err);
+      setError(err?.message ?? "Failed to send verification code");
+      toast.error(err?.message ?? "Failed to send verification code");
     } finally {
       setLoading(false);
     }
@@ -150,8 +170,8 @@ function AuthPage() {
             {error && <p className="text-xs text-destructive">{error}</p>}
             <button
               type="submit"
-              disabled={loading || !email}
-              className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-bold text-primary-foreground neon-glow disabled:opacity-50"
+              disabled={loading || !emailIsValid}
+              className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-bold text-primary-foreground neon-glow disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
               {loading ? "Sending code..." : "Send 6-digit code"}
