@@ -86,21 +86,46 @@ function AuthPage() {
 
   const verify = async (code: string) => {
     setError(null);
+    console.log("[auth] verifying OTP", { email: email.trim(), length: code.length });
+
+    if (code.length !== 6) {
+      setError("Please enter all 6 digits");
+      return;
+    }
+    if (!supabase?.auth?.verifyOtp) {
+      console.error("[auth] Supabase client not initialized correctly");
+      setError("Authentication service unavailable. Please refresh and try again.");
+      return;
+    }
+
     setLoading(true);
     try {
-      const { error } = await supabase.auth.verifyOtp({
+      const { data, error } = await supabase.auth.verifyOtp({
         email: email.trim(),
         token: code,
         type: "email",
       });
+      console.log("[auth] verifyOtp response", { hasSession: !!data?.session, error });
+
       if (error) {
+        console.error("[auth] verifyOtp error:", error);
         setError(error.message || "Invalid or expired code");
         toast.error(error.message || "Invalid or expired code");
         setOtp("");
         return;
       }
+      if (!data?.session) {
+        setError("Verification failed. Please request a new code.");
+        toast.error("Verification failed. Please request a new code.");
+        setOtp("");
+        return;
+      }
       toast.success("Signed in!");
       navigate({ to: "/" });
+    } catch (err: any) {
+      console.error("[auth] Unexpected verify error:", err);
+      setError(err?.message ?? "Failed to verify code");
+      toast.error(err?.message ?? "Failed to verify code");
     } finally {
       setLoading(false);
     }
