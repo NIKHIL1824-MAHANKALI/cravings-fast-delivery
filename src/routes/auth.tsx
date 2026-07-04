@@ -243,14 +243,9 @@ function AuthPage() {
             )}
             {error && <p className="text-center text-xs text-destructive">{error}</p>}
 
-            <button
-              type="button"
-              onClick={() => verify(otp)}
-              disabled={loading || otp.length < 6}
-              className="w-full rounded-2xl bg-primary py-3.5 text-sm font-bold text-primary-foreground neon-glow disabled:opacity-50"
-            >
-              {loading ? "Verifying..." : "Verify & sign in"}
-            </button>
+            <p className="text-center text-[11px] text-muted-foreground">
+              The code will be verified automatically once you enter all 6 digits.
+            </p>
 
             <div className="flex items-center justify-between text-[11px]">
               <button
