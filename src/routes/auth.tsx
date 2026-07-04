@@ -149,13 +149,30 @@ function AuthPage() {
       <div className="px-5 pt-4">
         <button
           type="button"
+          disabled={loading}
           onClick={async () => {
-            const res = await lovable.auth.signInWithOAuth("google", {
-              redirect_uri: window.location.origin + "/account",
-            });
-            if (res.error) toast.error(res.error.message || "Google sign-in failed");
+            setLoading(true);
+            setError(null);
+            try {
+              const res = await lovable.auth.signInWithOAuth("google", {
+                redirect_uri: window.location.origin + "/auth",
+                extraParams: { prompt: "select_account" },
+              });
+              if (res.error) {
+                toast.error(res.error.message || "Google sign-in failed");
+                setLoading(false);
+                return;
+              }
+              if (res.redirected) return;
+              // Popup flow: session is set
+              toast.success("Signed in with Google!");
+              navigate({ to: "/" });
+            } catch (err: any) {
+              toast.error(err?.message || "Google sign-in failed");
+              setLoading(false);
+            }
           }}
-          className="mb-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-white py-3.5 text-sm font-bold text-black shadow-lg active:scale-[0.98] transition"
+          className="mb-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-white py-3.5 text-sm font-bold text-black shadow-lg active:scale-[0.98] transition disabled:opacity-60"
         >
           <GoogleIcon /> Continue with Google
         </button>
