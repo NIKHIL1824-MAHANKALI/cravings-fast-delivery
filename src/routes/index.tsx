@@ -120,7 +120,7 @@ function Home() {
 
 
       {/* Search */}
-      <section className="mt-8 px-5">
+      <section className="mt-8 px-5 cv-auto">
         <Link to="/menu" className="glass flex items-center gap-3 rounded-2xl px-4 py-3.5">
           <Search className="h-4 w-4 text-muted-foreground" />
           <span className="text-sm text-muted-foreground">Search biryani, curries, snacks...</span>
@@ -150,7 +150,7 @@ function Home() {
 
       {/* Specials banner */}
       {specials.length > 0 && (
-        <section className="mt-8 px-5">
+        <section className="mt-8 px-5 cv-auto">
           <SectionTitle title="Today's Special" icon={<Sparkles className="h-4 w-4" />} />
           <div className="scroll-hide -mx-5 mt-3 flex gap-3 overflow-x-auto px-5 pb-2">
             {specials.map((item) => (
@@ -182,7 +182,7 @@ function Home() {
 
       {/* Popular */}
       {bestsellers.length > 0 && (
-        <section className="mt-8 px-5">
+        <section className="mt-8 px-5 cv-auto">
           <SectionTitle title="Popular Dishes" icon={<Flame className="h-4 w-4" />} />
           <div className="mt-3 grid gap-3">
             {bestsellers.slice(0, 4).map((item) => (
@@ -194,7 +194,7 @@ function Home() {
 
       {/* Snacks */}
       {snacks.length > 0 && (
-        <section className="mt-8 px-5">
+        <section className="mt-8 px-5 cv-auto">
           <SectionTitle title="Snacks Collection" />
           <div className="scroll-hide -mx-5 mt-3 flex gap-3 overflow-x-auto px-5 pb-2">
             {snacks.map((item) => (
@@ -208,7 +208,7 @@ function Home() {
 
       {/* Drinks */}
       {drinks.length > 0 && (
-        <section className="mt-8 px-5">
+        <section className="mt-8 px-5 cv-auto">
           <SectionTitle title="Cold Drinks" />
           <div className="scroll-hide -mx-5 mt-3 flex gap-3 overflow-x-auto px-5 pb-2">
             {drinks.map((item) => (
@@ -221,7 +221,7 @@ function Home() {
       )}
 
       {/* Why us */}
-      <section className="mt-10 px-5">
+      <section className="mt-10 px-5 cv-auto">
         <SectionTitle title="Why CRAVINGS" />
         <div className="mt-3 grid grid-cols-2 gap-3">
           {[
@@ -242,7 +242,7 @@ function Home() {
       </section>
 
       {/* Reviews */}
-      <section className="mt-8 px-5">
+      <section className="mt-8 px-5 cv-auto">
         <SectionTitle title="Loved by foodies" />
         <div className="scroll-hide -mx-5 mt-3 flex gap-3 overflow-x-auto px-5 pb-2">
           {[
