@@ -63,34 +63,22 @@ function Home() {
           {/* 3D Floating Biryani */}
           <div className="relative mx-auto mt-6 flex h-[300px] w-full items-center justify-center">
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="h-60 w-60 animate-pulse-glow rounded-full bg-primary/25 blur-2xl" />
+              <div className="pulse-glow-static h-60 w-60 rounded-full bg-primary/25 blur-2xl" />
             </div>
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
-              className="absolute h-72 w-72 rounded-full border border-dashed border-primary/30"
-            />
-            <motion.div
-              animate={{ rotate: -360 }}
-              transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-              className="absolute h-[340px] w-[340px] rounded-full border border-primary/10"
-            />
-            <motion.img
+            <div className="animate-spin-slow absolute h-72 w-72 rounded-full border border-dashed border-primary/30" />
+            <div className="animate-spin-slow-rev absolute h-[340px] w-[340px] rounded-full border border-primary/10" />
+            <img
               src={biryaniHero}
               alt="Chicken Biryani"
               width={1024}
               height={1024}
-              className="relative z-10 h-64 w-64 animate-float-slow rounded-full object-cover shadow-float"
+              loading="eager"
+              decoding="async"
+              className="animate-float-slow relative z-10 h-64 w-64 rounded-full object-cover shadow-float"
               style={{ filter: "drop-shadow(0 30px 40px rgba(198,255,0,0.35))" }}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
             />
-            <motion.div
-              className="absolute -right-1 top-4 glass-strong rounded-2xl px-3 py-2 shadow-card"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6 }}
+            <div
+              className="glass-strong absolute -right-1 top-4 rounded-2xl px-3 py-2 shadow-card"
             >
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Bestseller</p>
               <p className="font-display text-sm font-bold">Chicken Biryani</p>
