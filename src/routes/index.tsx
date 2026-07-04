@@ -83,12 +83,9 @@ function Home() {
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Bestseller</p>
               <p className="font-display text-sm font-bold">Chicken Biryani</p>
               <p className="text-xs font-bold neon-text">₹249</p>
-            </motion.div>
-            <motion.div
+            </div>
+            <div
               className="absolute -left-1 bottom-4 glass-strong flex items-center gap-2 rounded-2xl px-3 py-2 shadow-card"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.8 }}
             >
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/20">
                 <Leaf className="h-3.5 w-3.5 text-primary" />
@@ -97,7 +94,7 @@ function Home() {
                 <p className="text-[10px] text-muted-foreground">Made</p>
                 <p className="text-xs font-bold">Fresh today</p>
               </div>
-            </motion.div>
+            </div>
           </div>
 
           <div className="mt-5 grid grid-cols-2 gap-3">
