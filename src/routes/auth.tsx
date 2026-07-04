@@ -121,7 +121,7 @@ function AuthPage() {
         return;
       }
       toast.success("Signed in!");
-      navigate({ to: "/" });
+      window.location.href = "/";
     } catch (err: any) {
       console.error("[auth] Unexpected verify error:", err);
       setError(err?.message ?? "Failed to verify code");
@@ -166,7 +166,7 @@ function AuthPage() {
               if (res.redirected) return;
               // Popup flow: session is set
               toast.success("Signed in with Google!");
-              navigate({ to: "/" });
+              window.location.href = "/";
             } catch (err: any) {
               toast.error(err?.message || "Google sign-in failed");
               setLoading(false);
