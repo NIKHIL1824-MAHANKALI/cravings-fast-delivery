@@ -121,7 +121,7 @@ function AuthPage() {
         return;
       }
       toast.success("Signed in!");
-      navigate({ to: "/" });
+      window.location.href = "/";
     } catch (err: any) {
       console.error("[auth] Unexpected verify error:", err);
       setError(err?.message ?? "Failed to verify code");
