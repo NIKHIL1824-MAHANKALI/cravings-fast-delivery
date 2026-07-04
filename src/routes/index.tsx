@@ -63,44 +63,29 @@ function Home() {
           {/* 3D Floating Biryani */}
           <div className="relative mx-auto mt-6 flex h-[300px] w-full items-center justify-center">
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="h-60 w-60 animate-pulse-glow rounded-full bg-primary/25 blur-2xl" />
+              <div className="pulse-glow-static h-60 w-60 rounded-full bg-primary/25 blur-2xl" />
             </div>
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
-              className="absolute h-72 w-72 rounded-full border border-dashed border-primary/30"
-            />
-            <motion.div
-              animate={{ rotate: -360 }}
-              transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-              className="absolute h-[340px] w-[340px] rounded-full border border-primary/10"
-            />
-            <motion.img
+            <div className="animate-spin-slow absolute h-72 w-72 rounded-full border border-dashed border-primary/30" />
+            <div className="animate-spin-slow-rev absolute h-[340px] w-[340px] rounded-full border border-primary/10" />
+            <img
               src={biryaniHero}
               alt="Chicken Biryani"
               width={1024}
               height={1024}
-              className="relative z-10 h-64 w-64 animate-float-slow rounded-full object-cover shadow-float"
+              loading="eager"
+              decoding="async"
+              className="animate-float-slow relative z-10 h-64 w-64 rounded-full object-cover shadow-float"
               style={{ filter: "drop-shadow(0 30px 40px rgba(198,255,0,0.35))" }}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
             />
-            <motion.div
-              className="absolute -right-1 top-4 glass-strong rounded-2xl px-3 py-2 shadow-card"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6 }}
+            <div
+              className="glass-strong absolute -right-1 top-4 rounded-2xl px-3 py-2 shadow-card"
             >
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Bestseller</p>
               <p className="font-display text-sm font-bold">Chicken Biryani</p>
               <p className="text-xs font-bold neon-text">₹249</p>
-            </motion.div>
-            <motion.div
+            </div>
+            <div
               className="absolute -left-1 bottom-4 glass-strong flex items-center gap-2 rounded-2xl px-3 py-2 shadow-card"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.8 }}
             >
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/20">
                 <Leaf className="h-3.5 w-3.5 text-primary" />
@@ -109,7 +94,7 @@ function Home() {
                 <p className="text-[10px] text-muted-foreground">Made</p>
                 <p className="text-xs font-bold">Fresh today</p>
               </div>
-            </motion.div>
+            </div>
           </div>
 
           <div className="mt-5 grid grid-cols-2 gap-3">
@@ -135,7 +120,7 @@ function Home() {
 
 
       {/* Search */}
-      <section className="mt-8 px-5">
+      <section className="mt-8 px-5 cv-auto">
         <Link to="/menu" className="glass flex items-center gap-3 rounded-2xl px-4 py-3.5">
           <Search className="h-4 w-4 text-muted-foreground" />
           <span className="text-sm text-muted-foreground">Search biryani, curries, snacks...</span>
@@ -165,7 +150,7 @@ function Home() {
 
       {/* Specials banner */}
       {specials.length > 0 && (
-        <section className="mt-8 px-5">
+        <section className="mt-8 px-5 cv-auto">
           <SectionTitle title="Today's Special" icon={<Sparkles className="h-4 w-4" />} />
           <div className="scroll-hide -mx-5 mt-3 flex gap-3 overflow-x-auto px-5 pb-2">
             {specials.map((item) => (
@@ -197,7 +182,7 @@ function Home() {
 
       {/* Popular */}
       {bestsellers.length > 0 && (
-        <section className="mt-8 px-5">
+        <section className="mt-8 px-5 cv-auto">
           <SectionTitle title="Popular Dishes" icon={<Flame className="h-4 w-4" />} />
           <div className="mt-3 grid gap-3">
             {bestsellers.slice(0, 4).map((item) => (
@@ -209,7 +194,7 @@ function Home() {
 
       {/* Snacks */}
       {snacks.length > 0 && (
-        <section className="mt-8 px-5">
+        <section className="mt-8 px-5 cv-auto">
           <SectionTitle title="Snacks Collection" />
           <div className="scroll-hide -mx-5 mt-3 flex gap-3 overflow-x-auto px-5 pb-2">
             {snacks.map((item) => (
@@ -223,7 +208,7 @@ function Home() {
 
       {/* Drinks */}
       {drinks.length > 0 && (
-        <section className="mt-8 px-5">
+        <section className="mt-8 px-5 cv-auto">
           <SectionTitle title="Cold Drinks" />
           <div className="scroll-hide -mx-5 mt-3 flex gap-3 overflow-x-auto px-5 pb-2">
             {drinks.map((item) => (
@@ -236,7 +221,7 @@ function Home() {
       )}
 
       {/* Why us */}
-      <section className="mt-10 px-5">
+      <section className="mt-10 px-5 cv-auto">
         <SectionTitle title="Why CRAVINGS" />
         <div className="mt-3 grid grid-cols-2 gap-3">
           {[
@@ -257,7 +242,7 @@ function Home() {
       </section>
 
       {/* Reviews */}
-      <section className="mt-8 px-5">
+      <section className="mt-8 px-5 cv-auto">
         <SectionTitle title="Loved by foodies" />
         <div className="scroll-hide -mx-5 mt-3 flex gap-3 overflow-x-auto px-5 pb-2">
           {[
