@@ -137,10 +137,16 @@
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid oklch(0.93 0.24 125 / 0.1);
   }
+  .glass {
+    background: linear-gradient(145deg, oklch(0.22 0.04 145 / 0.75), oklch(0.22 0.04 145 / 0.55));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid oklch(0.93 0.24 125 / 0.1);
+  }
   .glass-strong {
-    background: linear-gradient(145deg, oklch(0.93 0.24 125 / 0.12), oklch(1 0 0 / 0.03));
-    backdrop-filter: blur(28px) saturate(180%);
-    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    background: linear-gradient(145deg, oklch(0.22 0.04 145 / 0.88), oklch(0.22 0.04 145 / 0.7));
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border: 1px solid oklch(0.93 0.24 125 / 0.14);
   }
   .neon-text {
@@ -155,31 +161,45 @@
   }
   .bg-darkgreen { background-color: var(--darkgreen); }
   .scroll-hide::-webkit-scrollbar { display: none; }
-  .scroll-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  .scroll-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+  }
+  .scroll-hide > * { scroll-snap-align: start; }
+
+  .cv-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 500px;
+  }
 
   @keyframes float-slow {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-14px) rotate(2deg); }
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50% { transform: translate3d(0, -12px, 0); }
   }
   @keyframes spin-slow {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
   }
-  @keyframes pulse-glow {
-    0%, 100% { box-shadow: 0 0 30px oklch(0.93 0.24 125 / 0.4), 0 0 80px oklch(0.93 0.24 125 / 0.15); }
-    50% { box-shadow: 0 0 60px oklch(0.93 0.24 125 / 0.75), 0 0 140px oklch(0.93 0.24 125 / 0.35); }
+  @keyframes spin-slow-reverse {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(-360deg); }
   }
-  @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+  .animate-float-slow {
+    animation: float-slow 6s ease-in-out infinite;
+    will-change: transform;
   }
-  .animate-float-slow { animation: float-slow 6s ease-in-out infinite; }
-  .animate-spin-slow { animation: spin-slow 30s linear infinite; }
-  .animate-pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
-  .shimmer {
-    background: linear-gradient(90deg, transparent, oklch(0.93 0.24 125 / 0.15), transparent);
-    background-size: 200% 100%;
-    animation: shimmer 2s linear infinite;
+  .animate-spin-slow {
+    animation: spin-slow 40s linear infinite;
+    will-change: transform;
+  }
+  .animate-spin-slow-rev {
+    animation: spin-slow-reverse 60s linear infinite;
+    will-change: transform;
+  }
+  .pulse-glow-static {
+    box-shadow: 0 0 45px oklch(0.93 0.24 125 / 0.55), 0 0 110px oklch(0.93 0.24 125 / 0.22);
   }
 }
 
