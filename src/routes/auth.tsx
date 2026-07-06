@@ -147,9 +147,40 @@ function AuthPage() {
     if (v.length === 6 && !loading) verify(v);
   };
 
+  if (checkingSession) {
+    return (
+      <MobileShell hideNav>
+        <div className="animate-pulse space-y-4 px-5 pt-6">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-muted/40" />
+            <div className="h-6 w-56 rounded-lg bg-muted/40" />
+          </div>
+          <div className="h-12 w-full rounded-2xl bg-muted/40" />
+          <div className="flex items-center gap-2 py-2">
+            <div className="h-px flex-1 bg-border" />
+            <div className="h-3 w-8 rounded bg-muted/40" />
+            <div className="h-px flex-1 bg-border" />
+          </div>
+          <div className="space-y-3 rounded-3xl bg-muted/20 p-5">
+            <div className="h-4 w-40 rounded bg-muted/40" />
+            <div className="h-11 w-full rounded-xl bg-muted/40" />
+            <div className="h-12 w-full rounded-2xl bg-muted/40" />
+          </div>
+        </div>
+      </MobileShell>
+    );
+  }
+
   return (
     <MobileShell hideNav>
+      {redirecting && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-background/85 backdrop-blur-sm">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm font-semibold text-muted-foreground">Signing you in...</p>
+        </div>
+      )}
       <header className="flex items-center gap-3 px-5 pt-6 pb-2">
+
         <Link to="/" className="glass flex h-10 w-10 items-center justify-center rounded-full">
           <ArrowLeft className="h-4 w-4" />
         </Link>
