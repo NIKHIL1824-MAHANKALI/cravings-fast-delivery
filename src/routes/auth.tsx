@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Loader2, Mail, ArrowRight } from "lucide-react";
+import { ArrowLeft, Loader2, Mail, ArrowRight, AlertCircle, RotateCcw } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { MobileShell } from "@/components/MobileShell";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
