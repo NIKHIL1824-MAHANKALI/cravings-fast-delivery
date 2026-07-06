@@ -17,13 +17,21 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cd, setCd] = useState(0);
+  const [checkingSession, setCheckingSession] = useState(true);
+  const [redirecting, setRedirecting] = useState(false);
   const cooldownRef = useRef<number>(0);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: "/account" });
+      if (data.user) {
+        setRedirecting(true);
+        navigate({ to: "/account" });
+      } else {
+        setCheckingSession(false);
+      }
     });
   }, [navigate]);
+
 
   useEffect(() => {
     if (!cd) return;
