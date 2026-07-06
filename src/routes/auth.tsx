@@ -176,7 +176,9 @@ function AuthPage() {
               if (res.redirected) return;
               // Popup flow: session is set
               toast.success("Signed in with Google!");
+              setRedirecting(true);
               window.location.href = "/";
+
             } catch (err: any) {
               toast.error(err?.message || "Google sign-in failed");
               setLoading(false);
