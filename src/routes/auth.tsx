@@ -277,7 +277,11 @@ function AuthPage() {
               </p>
             </div>
 
-            <div className="flex justify-center py-2">
+            <motion.div
+              animate={error ? { x: [0, -8, 8, -6, 6, -3, 3, 0] } : { x: 0 }}
+              transition={{ duration: 0.45 }}
+              className="flex justify-center py-2"
+            >
               <InputOTP
                 maxLength={6}
                 value={otp}
@@ -290,23 +294,77 @@ function AuthPage() {
                     <InputOTPSlot
                       key={i}
                       index={i}
-                      className="h-12 w-11 rounded-xl border border-border bg-background/40 text-lg font-bold"
+                      className={`h-12 w-11 rounded-xl border text-lg font-bold transition-colors ${
+                        error
+                          ? "border-destructive/70 bg-destructive/10 text-destructive"
+                          : "border-border bg-background/40"
+                      }`}
                     />
                   ))}
                 </InputOTPGroup>
               </InputOTP>
-            </div>
+            </motion.div>
 
-            {loading && (
-              <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                <Loader2 className="h-3.5 w-3.5 animate-spin" /> Verifying...
-              </div>
-            )}
-            {error && <p className="text-center text-xs text-destructive">{error}</p>}
+            <AnimatePresence mode="wait" initial={false}>
+              {loading ? (
+                <motion.div
+                  key="verifying"
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  className="flex items-center justify-center gap-2 text-xs text-muted-foreground"
+                >
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> Verifying your code...
+                </motion.div>
+              ) : error ? (
+                <motion.div
+                  key="error"
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  className="space-y-3 rounded-2xl border border-destructive/40 bg-destructive/10 p-3"
+                >
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-destructive">Verification failed</p>
+                      <p className="mt-0.5 text-[11px] text-destructive/80">{error}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOtp("");
+                        setError(null);
+                      }}
+                      className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-primary py-2 text-[11px] font-bold text-primary-foreground active:scale-[0.98]"
+                    >
+                      <RotateCcw className="h-3.5 w-3.5" /> Try again
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => sendCode(true)}
+                      disabled={cd > 0 || loading}
+                      className="flex-1 rounded-xl border border-border bg-background/40 py-2 text-[11px] font-semibold text-foreground disabled:opacity-50"
+                    >
+                      {cd > 0 ? `Resend in ${cd}s` : "Resend code"}
+                    </button>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.p
+                  key="hint"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="text-center text-[11px] text-muted-foreground"
+                >
+                  The code will be verified automatically once you enter all 6 digits.
+                </motion.p>
+              )}
+            </AnimatePresence>
 
-            <p className="text-center text-[11px] text-muted-foreground">
-              The code will be verified automatically once you enter all 6 digits.
-            </p>
 
             <div className="flex items-center justify-between text-[11px]">
               <button
