@@ -61,12 +61,12 @@ function Home() {
           </p>
 
           {/* 3D Floating Biryani */}
-          <div className="relative mx-auto mt-6 flex h-[300px] w-full items-center justify-center">
+          <div className="relative mx-auto mt-6 flex h-[260px] w-full max-w-[360px] items-center justify-center sm:h-[300px]">
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="pulse-glow-static h-60 w-60 rounded-full bg-primary/25 blur-2xl" />
+              <div className="pulse-glow-static h-48 w-48 rounded-full bg-primary/25 blur-2xl sm:h-60 sm:w-60" />
             </div>
-            <div className="animate-spin-slow absolute h-72 w-72 rounded-full border border-dashed border-primary/30" />
-            <div className="animate-spin-slow-rev absolute h-[340px] w-[340px] rounded-full border border-primary/10" />
+            <div className="animate-spin-slow absolute h-56 w-56 rounded-full border border-dashed border-primary/30 sm:h-72 sm:w-72" />
+            <div className="animate-spin-slow-rev absolute h-[260px] w-[260px] rounded-full border border-primary/10 sm:h-[340px] sm:w-[340px]" />
             <img
               src={biryaniHero}
               alt="Chicken Biryani"
@@ -74,19 +74,16 @@ function Home() {
               height={1024}
               loading="eager"
               decoding="async"
-              className="animate-float-slow relative z-10 h-64 w-64 rounded-full object-cover shadow-float"
+              className="animate-float-slow relative z-10 h-48 w-48 rounded-full object-cover shadow-float sm:h-64 sm:w-64"
               style={{ filter: "drop-shadow(0 30px 40px rgba(198,255,0,0.35))" }}
             />
-            <div
-              className="glass-strong absolute -right-1 top-4 rounded-2xl px-3 py-2 shadow-card"
-            >
+          </div>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+            <div className="glass-strong rounded-2xl px-3 py-2 shadow-card">
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Bestseller</p>
-              <p className="font-display text-sm font-bold">Chicken Biryani</p>
-              <p className="text-xs font-bold neon-text">₹249</p>
+              <p className="font-display text-sm font-bold">Chicken Biryani · <span className="neon-text">₹249</span></p>
             </div>
-            <div
-              className="absolute -left-1 bottom-4 glass-strong flex items-center gap-2 rounded-2xl px-3 py-2 shadow-card"
-            >
+            <div className="glass-strong flex items-center gap-2 rounded-2xl px-3 py-2 shadow-card">
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/20">
                 <Leaf className="h-3.5 w-3.5 text-primary" />
               </div>
