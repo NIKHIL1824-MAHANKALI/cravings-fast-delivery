@@ -63,6 +63,10 @@ export type Database = {
           customer_name: string
           id: string
           items: Json
+          latitude: number | null
+          location_accuracy: number | null
+          longitude: number | null
+          maps_url: string | null
           phone: string
           status: Database["public"]["Enums"]["order_status"]
           total: number
@@ -74,6 +78,10 @@ export type Database = {
           customer_name: string
           id?: string
           items: Json
+          latitude?: number | null
+          location_accuracy?: number | null
+          longitude?: number | null
+          maps_url?: string | null
           phone: string
           status?: Database["public"]["Enums"]["order_status"]
           total: number
@@ -85,6 +93,10 @@ export type Database = {
           customer_name?: string
           id?: string
           items?: Json
+          latitude?: number | null
+          location_accuracy?: number | null
+          longitude?: number | null
+          maps_url?: string | null
           phone?: string
           status?: Database["public"]["Enums"]["order_status"]
           total?: number
