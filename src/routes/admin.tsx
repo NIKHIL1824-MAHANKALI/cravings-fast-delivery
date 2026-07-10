@@ -28,7 +28,12 @@ interface Order {
   created_at: string;
   user_id: string | null;
   items: any;
+  latitude: number | null;
+  longitude: number | null;
+  location_accuracy: number | null;
+  maps_url: string | null;
 }
+
 
 const STATUS_FLOW: OrderStatus[] = [
   "pending", "accepted", "preparing", "packed", "out_for_delivery", "delivered", "cancelled",
