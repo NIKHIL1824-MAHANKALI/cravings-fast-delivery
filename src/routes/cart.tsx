@@ -136,10 +136,6 @@ function Row({ label, value, bold }: { label: string; value: string; bold?: bool
   );
 }
 
-function Checkout({ onClose, onPlaced }: { onClose: () => void; onPlaced: (orderId: string) => void }) {
-  const { items, total } = useCart();
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
 type LocState =
   | { kind: "idle" }
   | { kind: "detecting" }
