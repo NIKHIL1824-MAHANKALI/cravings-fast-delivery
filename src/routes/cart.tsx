@@ -251,7 +251,32 @@ function Checkout({ onClose, onPlaced }: { onClose: () => void; onPlaced: (order
             <h2 className="text-xl font-bold">Delivery details</h2>
             <Input label="Full name" value={name} onChange={setName} />
             <Input label="Phone" value={phone} onChange={setPhone} type="tel" />
-            <Input label="Address" value={address} onChange={setAddress} textarea />
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-muted-foreground">Address</span>
+                <button
+                  type="button"
+                  onClick={useCurrentLocation}
+                  disabled={locating}
+                  className="glass flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-primary disabled:opacity-60"
+                >
+                  {locating ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <MapPin className="h-3.5 w-3.5" />
+                  )}
+                  {locating ? "Locating..." : "Use current location"}
+                </button>
+              </div>
+              <textarea
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                rows={3}
+                placeholder="Street, area, landmark…"
+                className="glass w-full rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+
             <button
               type="submit"
               disabled={loading}
