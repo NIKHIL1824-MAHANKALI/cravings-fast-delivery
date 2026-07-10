@@ -137,8 +137,52 @@ function Checkout({ onClose, onPlaced }: { onClose: () => void; onPlaced: (order
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
+  const [locating, setLocating] = useState(false);
   const [success, setSuccess] = useState(false);
   const delivery = 29;
+
+  const useCurrentLocation = () => {
+    if (!("geolocation" in navigator)) {
+      toast.error("Geolocation not supported on this device");
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
+            { headers: { Accept: "application/json" } }
+          );
+          const data = await res.json();
+          const addr = data?.display_name as string | undefined;
+          if (addr) {
+            setAddress(addr);
+            toast.success("Location detected");
+          } else {
+            setAddress(`Lat ${latitude.toFixed(5)}, Lng ${longitude.toFixed(5)}`);
+            toast.message("Coordinates used — please refine the address");
+          }
+        } catch {
+          setAddress(`Lat ${latitude.toFixed(5)}, Lng ${longitude.toFixed(5)}`);
+          toast.error("Could not fetch address, coordinates saved");
+        } finally {
+          setLocating(false);
+        }
+      },
+      (err) => {
+        setLocating(false);
+        toast.error(
+          err.code === err.PERMISSION_DENIED
+            ? "Location permission denied"
+            : "Could not get your location"
+        );
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
+
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
