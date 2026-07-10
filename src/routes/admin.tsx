@@ -407,6 +407,17 @@ function OrdersPanel({
                 </span>
               </div>
               <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">📍 {o.address}</p>
+              {o.latitude != null && o.longitude != null && (
+                <a
+                  href={o.maps_url ?? `https://www.google.com/maps?q=${o.latitude},${o.longitude}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-2.5 py-1 text-[10px] font-bold text-primary"
+                >
+                  🧭 Navigate · {o.latitude.toFixed(5)}, {o.longitude.toFixed(5)}
+                  {o.location_accuracy != null && ` (±${Math.round(o.location_accuracy)}m)`}
+                </a>
+              )}
               <div className="mt-2 rounded-xl bg-surface-elevated/40 p-2 text-[11px]">
                 {Array.isArray(o.items)
                   ? o.items.map((i: any) => `${i.name} × ${i.qty}`).join(" · ")
