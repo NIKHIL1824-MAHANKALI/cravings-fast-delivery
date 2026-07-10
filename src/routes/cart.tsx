@@ -468,29 +468,3 @@ function Input({
     </label>
   );
 }
-
-
-function Input({
-  label, value, onChange, type = "text", textarea,
-}: { label: string; value: string; onChange: (v: string) => void; type?: string; textarea?: boolean }) {
-  return (
-    <label className="block">
-      <span className="mb-1 block text-xs font-semibold text-muted-foreground">{label}</span>
-      {textarea ? (
-        <textarea
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          rows={2}
-          className="glass w-full rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary"
-        />
-      ) : (
-        <input
-          type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="glass w-full rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary"
-        />
-      )}
-    </label>
-  );
-}
