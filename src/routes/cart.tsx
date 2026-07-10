@@ -1,14 +1,19 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag, MapPin, Loader2 } from "lucide-react";
+import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag, MapPin, Loader2, RefreshCw, CheckCircle2, AlertCircle } from "lucide-react";
 import { MobileShell } from "@/components/MobileShell";
 import { useCart } from "@/lib/cart";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { ClientOnly } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+const LocationPicker = lazy(() => import("@/components/LocationPicker"));
+
+const LOC_PREF_KEY = "cravings.locationPref"; // "granted" | "denied"
 
 export const Route = createFileRoute("/cart")({ component: CartPage });
+
 
 function CartPage() {
   const { items, setQty, remove, total, clear } = useCart();
