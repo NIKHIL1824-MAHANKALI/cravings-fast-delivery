@@ -128,9 +128,9 @@ function Home() {
       <section className="mt-6 px-5">
         <div className="grid grid-cols-3 gap-3">
           {[
-            { label: "Meals", icon: "🍛", to: "/menu", q: "meals" },
-            { label: "Snacks", icon: "🥟", to: "/menu", q: "snacks" },
-            { label: "Drinks", icon: "🥤", to: "/menu", q: "drinks" },
+            { label: "Meals", icon: "🍛", to: "/menu", q: "meals" as const },
+            { label: "Snacks", icon: "🥟", to: "/menu", q: "snacks" as const },
+            { label: "Drinks", icon: "🥤", to: "/menu", q: "drinks" as const },
           ].map((c) => (
             <Link
               key={c.label}
